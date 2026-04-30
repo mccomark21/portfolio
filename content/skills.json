@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-04-29T00:00:00.000Z",
+  "categories": [
+    {
+      "category": "Languages",
+      "skills": [
+        { "name": "TypeScript", "projects": ["copilot-bootstrap"] },
+        { "name": "Node.js",    "projects": ["copilot-bootstrap"] }
+      ]
+    },
+    {
+      "category": "AI & Tooling",
+      "skills": [
+        { "name": "GitHub Copilot", "projects": ["copilot-bootstrap"] },
+        { "name": "AI",             "projects": ["copilot-bootstrap"] },
+        { "name": "CLI",            "projects": ["copilot-bootstrap"] }
+      ]
+    }
+  ]
+}

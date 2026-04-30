@@ -1,0 +1,87 @@
+name: Weekly Content Refresh
+
+on:
+  schedule:
+    # Every Monday at 09:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-content
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Octokit
+        run: npm install --no-save octokit
+
+      - name: Check repos for updates
+        id: refresh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/refresh-content.mjs
+
+      - name: Open PR if posts were flagged
+        if: steps.refresh.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="refresh/content-$(date +%s)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add content/posts/ .github/state/
+          git diff --cached --quiet && exit 0
+          git commit -m "refresh: flag posts with needsReview from upstream activity"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --head "$BRANCH" \
+            --base main \
+            --title "refresh: upstream changes detected (${{ steps.refresh.outputs.flagged_count }} post(s))" \
+            --body "## Weekly Content Refresh
+
+          The **refresh-content** workflow detected upstream activity in tracked repositories.
+
+          ### What changed
+          - **${{ steps.refresh.outputs.flagged_count }}** post(s) flagged with \`needsReview: true\`
+          - State cursor updated in \`.github/state/content-refresh.json\`
+
+          ### Next steps
+          Review each flagged post and update the content to reflect the latest upstream changes.  
+          Clear \`needsReview: true\` once satisfied, then merge to publish.
+
+          > Posts are **not** automatically republished — you control what goes live." \
+            --label "refresh,needs-review" 2>/dev/null || \
+          echo "PR already open for this refresh cycle."
+
+      - name: Commit state even if no posts flagged
+        if: steps.refresh.outputs.has_changes != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/state/ || true
+          git diff --cached --quiet || git commit -m "ci: update content-refresh state"
+          git push origin HEAD:main || true

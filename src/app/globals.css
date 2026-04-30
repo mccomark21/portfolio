@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --color-nav: #0d5c63;
+  --color-nav-hover: #0a4a50;
+  --color-link-accent: #4aafb7;
+  --color-bg-primary: #f7f4ef;
+  --color-bg-accent: #f0ece3;
+  --color-bg-teal: #eef8f8;
+  --color-text-dark: #2b2b2b;
+  --color-text-light: #f2f2f2;
+  --color-footer-secondary: #a8d8db;
+  --color-card-border: rgba(13, 92, 99, 0.15);
+}
+
+@theme inline {
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-dark);
+  --font-sans: var(--font-body);
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-dark);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), var(--font-body), system-ui, sans-serif;
+}
+
+a {
+  color: var(--color-nav);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.nav-link {
+  color: var(--color-text-light);
+  border-bottom: 2px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.nav-link:hover {
+  color: var(--color-text-light);
+  border-color: var(--color-link-accent);
+  text-decoration: none;
+}
+
+.nav-link-brand {
+  color: var(--color-text-light);
+}
+
+.nav-link-brand:hover {
+  color: var(--color-text-light);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--color-nav);
+  color: var(--color-text-light);
+}
+
+.btn-primary:hover {
+  background: var(--color-nav-hover);
+  text-decoration: none;
+}
+
+.btn-secondary {
+  border: 1px solid var(--color-nav);
+  color: var(--color-nav);
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-teal);
+  text-decoration: none;
+}

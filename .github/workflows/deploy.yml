@@ -1,0 +1,54 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static export
+        env:
+          # Set to "" to deploy to a custom domain root instead of /portfolio
+          NEXT_PUBLIC_BASE_PATH: /portfolio
+        run: npm run build
+
+      - name: Verify output directory
+        run: |
+          if [ ! -d "out" ]; then
+            echo "❌ Build failed: 'out' directory was not generated."
+            exit 1
+          fi
+          echo "✅ Static export generated:"
+          find out -maxdepth 1 | head -20
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          enable_jekyll: false
+          commit_message: "deploy: ${{ github.sha }}"
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"

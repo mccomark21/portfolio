@@ -1,0 +1,51 @@
+---
+title: "Building copilot-bootstrap: Scaffolding Projects with AI"
+date: "2026-04-29"
+summary: "How I built copilot-bootstrap — a CLI that uses GitHub Copilot to auto-generate project boilerplate, configuration files, and documentation so you can go from zero to productive faster than ever."
+repoUrl: "https://github.com/mccomark21/copilot-bootstrap"
+techStack: ["TypeScript", "Node.js", "GitHub Copilot", "CLI", "AI"]
+published: true
+needsReview: false
+---
+
+## Overview
+
+Starting a new project from scratch means wiring up the same tedious setup over and over — ESLint configs, tsconfig, CI workflows, README skeletons, Docker files. `copilot-bootstrap` automates that ceremony by integrating GitHub Copilot at the scaffolding step rather than the editing step.
+
+## Motivation
+
+I found myself copy-pasting boilerplate between projects and gradually diverging on config conventions. I wanted a single entry-point that would ask a few high-level questions — language, framework, deployment target — and generate a consistent, opinionated baseline in seconds.
+
+## Approach
+
+The CLI is built in TypeScript and runs as a Node.js executable. At startup it:
+
+1. Prompts the user for project metadata (name, description, stack).
+2. Calls the GitHub Copilot API to generate config files tailored to the stated stack.
+3. Writes the generated files to disk and performs a final pass to resolve any cross-file inconsistencies.
+
+```typescript
+// Example: invoking the scaffold step
+const result = await scaffolder.run({
+  name: "my-service",
+  language: "typescript",
+  framework: "express",
+  ci: "github-actions",
+});
+console.log(`Generated ${result.files.length} files in ${result.dir}`);
+```
+
+## Tech Stack
+
+- **TypeScript** for type-safe CLI internals
+- **Node.js** for file I/O and process management  
+- **GitHub Copilot API** for content generation
+- **Commander.js** for argument parsing
+
+## Outcomes
+
+The tool reduced my per-project setup time from ~30 minutes to under 2 minutes, and the generated configs are immediately usable without manual edits for the common cases.
+
+## Conclusion
+
+`copilot-bootstrap` is a good example of using AI as a development multiplier at the *infrastructure* level rather than the code-writing level. The repo is open and PRs are welcome.

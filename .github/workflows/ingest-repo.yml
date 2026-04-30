@@ -1,0 +1,137 @@
+name: Ingest Repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: "GitHub repository URL (e.g. https://github.com/owner/repo)"
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "content/repos.json"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ingest-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.repo_url || 'repos-json-update' }}
+  cancel-in-progress: true
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Determine which repos need ingestion
+  # -----------------------------------------------------------------------
+  resolve-repos:
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.parse.outputs.repos }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse repo list
+        id: parse
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            URL="${{ github.event.inputs.repo_url }}"
+            # Basic URL validation
+            if [[ ! "$URL" =~ ^https://github\.com/[^/]+/[^/]+$ ]]; then
+              echo "❌ Invalid URL format. Expected: https://github.com/owner/repo"
+              exit 1
+            fi
+            echo "repos=[\"$URL\"]" >> "$GITHUB_OUTPUT"
+          else
+            # Push to main: ingest all repos listed in repos.json
+            REPOS=$(jq -c '[.[].url]' content/repos.json)
+            echo "repos=$REPOS" >> "$GITHUB_OUTPUT"
+          fi
+
+  # -----------------------------------------------------------------------
+  # Ingest each repo and open a draft PR
+  # -----------------------------------------------------------------------
+  ingest:
+    needs: resolve-repos
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo_url: ${{ fromJson(needs.resolve-repos.outputs.repos) }}
+      max-parallel: 2
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Octokit
+        run: npm install --no-save octokit
+
+      - name: Generate draft blog post
+        id: ingest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: ${{ secrets.LLM_PROVIDER }}
+        run: |
+          node .github/scripts/ingest-repo.mjs --repo "${{ matrix.repo_url }}"
+
+      - name: Sync skills manifest
+        run: node .github/scripts/sync-skills.mjs
+
+      - name: Prepare PR branch and open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO_SLUG=$(echo "${{ matrix.repo_url }}" | sed 's|.*/||')
+          BRANCH="ingest/${REPO_SLUG}-$(date +%s)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add content/posts/ content/skills.json
+          git diff --cached --quiet && { echo "No changes to commit."; exit 0; }
+          git commit -m "ingest: add draft post for ${REPO_SLUG}"
+          git push origin "$BRANCH"
+
+          # Build PR body
+          PR_BODY=$(cat <<'PREOF'
+          ## AI-Generated Content — Review Required
+
+          This pull request was opened automatically by the **Ingest Repository** workflow.
+
+          ### What was generated
+          - **Draft blog post**: `content/posts/${{ steps.ingest.outputs.post_slug }}.mdx`  
+            Title: *${{ steps.ingest.outputs.post_title }}*
+          - **Skills manifest**: `content/skills.json` updated from post `techStack`
+
+          ### Before merging, please verify
+          - [ ] The post title and summary accurately describe the project
+          - [ ] The `techStack` array is complete and correct
+          - [ ] All code examples are valid
+          - [ ] The post reads naturally (AI drafts often need light editing)
+          - [ ] Set `published: true` when you are satisfied with the content
+          - [ ] Optionally add or edit the matching project card in `content/projects/`
+
+          > Nothing goes live until this PR is merged. Merging will trigger a new deployment.
+          PREOF
+          )
+
+          gh pr create \
+            --head "$BRANCH" \
+            --base main \
+            --title "ingest: draft post for ${REPO_SLUG}" \
+            --body "$PR_BODY" \
+            --draft \
+            --label "ai-generated,needs-review" 2>/dev/null || \
+          echo "PR may already exist for this branch."
