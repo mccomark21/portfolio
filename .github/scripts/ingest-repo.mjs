@@ -16,7 +16,6 @@
  *   LLM_PROVIDER       (optional) "openai" | "anthropic"
  */
 
-import { Octokit } from "octokit";
 import { generate } from "./llm-client.mjs";
 import fs from "fs";
 import path from "path";
@@ -44,7 +43,7 @@ const OUTPUT_DIR = path.resolve("content/posts");
 // ---------------------------------------------------------------------------
 // GitHub API helpers
 // ---------------------------------------------------------------------------
-const octokit = new Octokit({ auth: process.env.GH_TOKEN });
+let octokit;
 
 async function fetchReadme() {
   try {
@@ -105,14 +104,14 @@ Generate a complete MDX file with the following YAML frontmatter block first, th
 ---
 title: "<descriptive title for the project blog post>"
 date: "${today}"
-summary: "<2–3 sentence summary>"
+summary: "<2-3 sentence summary>"
 repoUrl: "${meta.htmlUrl}"
 techStack: [<comma-separated quoted technology names>]
 published: false
-needsReview: false
+needsReview: true
 ---
 
-Then write 5–7 paragraphs with these H2 sections:
+Then write 5-7 paragraphs with these H2 sections:
 ## Overview
 ## Motivation
 ## Approach
@@ -152,11 +151,43 @@ function toSlug(name) {
     .replace(/^-|-$/g, "");
 }
 
+function resolveLlmConfig() {
+  const provider = (process.env.LLM_PROVIDER ?? "").toLowerCase().trim();
+  const hasOpenAiKey = Boolean((process.env.OPENAI_API_KEY ?? "").trim());
+  const hasAnthropicKey = Boolean((process.env.ANTHROPIC_API_KEY ?? "").trim());
+
+  const canGenerate =
+    (provider === "openai" && hasOpenAiKey) ||
+    (provider === "anthropic" && hasAnthropicKey) ||
+    (!provider && (hasOpenAiKey || hasAnthropicKey));
+
+  return { provider, canGenerate };
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
   console.log(`\nIngesting ${repoUrl}...`);
+
+  const { provider, canGenerate } = resolveLlmConfig();
+  if (!canGenerate) {
+    const selected = provider || "auto";
+    const reason =
+      "Skipping ingest: no valid LLM configuration found. Set LLM_PROVIDER to 'openai' or 'anthropic' and provide the matching API key secret.";
+
+    console.warn(reason);
+
+    const ghOutput = process.env.GITHUB_OUTPUT;
+    if (ghOutput) {
+      fs.appendFileSync(ghOutput, `skipped=true\nskip_reason=${reason}\nllm_provider=${selected}\n`);
+    }
+
+    return;
+  }
+
+  const { Octokit } = await import("octokit");
+  octokit = new Octokit({ auth: process.env.GH_TOKEN });
 
   const [readme, meta, commits] = await Promise.all([
     fetchReadme(),
@@ -192,7 +223,7 @@ async function main() {
     `**Generated post:** \`content/posts/${slug}.mdx\``,
     `**Title:** ${title}`,
     `**Tech stack:** ${techStack.join(", ")}`,
-    `**Status:** \`published: false\` — requires manual review before going live`,
+    "**Status:** `published: false` and `needsReview: true` - requires manual review before going live",
   ].join("\n");
 
   // Write to GITHUB_OUTPUT if running in Actions
