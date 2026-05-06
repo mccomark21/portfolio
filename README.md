@@ -142,6 +142,47 @@ npm run validate:content
 
 Validates all MDX files against Zod schemas. Run before committing content changes.
 
+## Agent Workflow Skills
+
+This repository includes [mattpocock/skills](https://github.com/mattpocock/skills) as a git submodule at `vendor/mattpocock-skills` to support codebase organization and workflow automation.
+
+### First-Time Setup
+
+In your coding agent, run:
+
+```text
+/setup-matt-pocock-skills
+```
+
+When prompted, choose `GitHub Issues` as the issue tracker.
+
+### Useful Commands
+
+- `/tdd`
+- `/diagnose`
+- `/triage`
+- `/zoom-out`
+
+### Submodule Maintenance
+
+Clone with submodules:
+
+```bash
+git clone --recurse-submodules <repo-url>
+```
+
+If you already cloned without submodules:
+
+```bash
+git submodule update --init --recursive
+```
+
+Update to latest upstream skills:
+
+```bash
+git submodule update --remote vendor/mattpocock-skills
+```
+
 ## Build & Deployment
 
 ### Static Export
