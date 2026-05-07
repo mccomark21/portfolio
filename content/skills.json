@@ -1,19 +1,40 @@
 {
-  "generatedAt": "2026-04-29T00:00:00.000Z",
+  "generatedAt": "2026-05-06T00:00:00.000Z",
   "categories": [
     {
       "category": "Languages",
       "skills": [
-        { "name": "TypeScript", "projects": ["copilot-bootstrap"] },
-        { "name": "Node.js",    "projects": ["copilot-bootstrap"] }
+        { "name": "TypeScript", "projects": ["copilot-bootstrap", "fantasy-edge"] }
       ]
     },
     {
-      "category": "AI & Tooling",
+      "category": "Frontend",
       "skills": [
-        { "name": "GitHub Copilot", "projects": ["copilot-bootstrap"] },
-        { "name": "AI",             "projects": ["copilot-bootstrap"] },
+        { "name": "React",          "projects": ["fantasy-edge"] },
+        { "name": "Vite",           "projects": ["fantasy-edge"] },
+        { "name": "Tailwind CSS",   "projects": ["fantasy-edge"] },
+        { "name": "shadcn/ui",      "projects": ["fantasy-edge"] },
+        { "name": "TanStack Table", "projects": ["fantasy-edge"] }
+      ]
+    },
+    {
+      "category": "Data & Scraping",
+      "skills": [
+        { "name": "DuckDB WASM", "projects": ["fantasy-edge"] },
+        { "name": "Cheerio",     "projects": ["fantasy-edge"] }
+      ]
+    },
+    {
+      "category": "Runtime & Tooling",
+      "skills": [
+        { "name": "Node.js",        "projects": ["copilot-bootstrap"] },
         { "name": "CLI",            "projects": ["copilot-bootstrap"] }
+      ]
+    },
+    {
+      "category": "AI",
+      "skills": [
+        { "name": "GitHub Copilot", "projects": ["copilot-bootstrap"] }
       ]
     }
   ]
