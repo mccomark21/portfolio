@@ -61,6 +61,26 @@ export type SkillCategory = z.infer<typeof SkillCategorySchema>;
 export type SkillsManifest = z.infer<typeof SkillsManifestSchema>;
 
 // ---------------------------------------------------------------------------
+// Enriched skills — returned by getEnrichedSkills(), not read directly from disk.
+// `projects` is computed by cross-referencing techStack across posts and projects;
+// it is NOT the raw value from skills.json.
+// ---------------------------------------------------------------------------
+export interface EnrichedSkillItem {
+  name: string;
+  projects: string[];
+}
+
+export interface EnrichedSkillCategory {
+  category: string;
+  skills: EnrichedSkillItem[];
+}
+
+export interface EnrichedSkillsManifest {
+  generatedAt?: string;
+  categories: EnrichedSkillCategory[];
+}
+
+// ---------------------------------------------------------------------------
 // Watched repos – content/repos.json
 // ---------------------------------------------------------------------------
 export const WatchedRepoSchema = z.object({

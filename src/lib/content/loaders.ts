@@ -62,8 +62,9 @@ export function getAllPosts(includeUnpublished = false): PostMeta[] {
     );
 }
 
-export function getPostBySlug(slug: string): Post {
+export function getPostBySlug(slug: string): Post | null {
   const filePath = path.join(CONTENT_ROOT, "posts", `${slug}.mdx`);
+  if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
   return { slug, frontmatter: PostFrontmatterSchema.parse(data), content };
@@ -96,8 +97,9 @@ export interface StaticPage {
   content: string;
 }
 
-export function getStaticPage(name: string): StaticPage {
+export function getStaticPage(name: string): StaticPage | null {
   const filePath = path.join(CONTENT_ROOT, "pages", `${name}.mdx`);
+  if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
   return { frontmatter: StaticPageFrontmatterSchema.parse(data), content };

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
+import { NAV_ROUTES, SITE_METADATA } from "@/lib/routes";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -14,19 +15,7 @@ const headingFont = Playfair_Display({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Personal portfolio — projects, blog, and more.",
-};
-
-const NAV = [
-  { href: "/blog", label: "Blog" },
-  { href: "/skills", label: "Skills" },
-  { href: "/about", label: "About" },
-  { href: "/education", label: "Education" },
-  { href: "/interests", label: "Interests" },
-  { href: "/resume", label: "Resume" },
-];
+export const metadata: Metadata = SITE_METADATA;
 
 export default function RootLayout({
   children,
@@ -44,7 +33,7 @@ export default function RootLayout({
             <Link href="/" className="nav-link-brand font-bold mr-4">
               Portfolio
             </Link>
-            <NavLinks items={NAV} />
+            <NavLinks items={NAV_ROUTES} />
           </nav>
         </header>
         <main className="max-w-5xl mx-auto px-4 py-12">{children}</main>

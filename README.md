@@ -163,6 +163,21 @@ When prompted, choose `GitHub Issues` as the issue tracker.
 - `/triage`
 - `/zoom-out`
 
+### VS Code Prompt Wrappers (Local)
+
+This repo vendors the skill source files, but VS Code Copilot command prompts are discovered from your user prompts folder.
+
+Create wrappers in:
+
+- `C:\Users\<you>\AppData\Roaming\Code\User\prompts`
+
+This machine is configured with:
+
+- `improve-codebase-architecture.prompt.md`
+- `setup-matt-pocock-skills.prompt.md`
+
+If prompt commands do not appear immediately, reload the VS Code window.
+
 ### Submodule Maintenance
 
 Clone with submodules:

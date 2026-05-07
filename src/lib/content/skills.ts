@@ -1,13 +1,13 @@
 import { getAllPosts, getAllProjects } from "./loaders";
 import { getSkillsManifest } from "./loaders";
-import type { SkillsManifest } from "./schemas";
+import type { EnrichedSkillsManifest } from "./schemas";
 
 /**
  * Return the skills manifest enriched with project/post references for each skill.
- * The "projects" array on each skill is populated from blog posts and project cards
- * that include that skill name in their techStack arrays.
+ * The `projects` array on each EnrichedSkillItem is computed by case-insensitive
+ * techStack matching across all posts and projects — it is NOT read from skills.json.
  */
-export function getEnrichedSkills(): SkillsManifest {
+export function getEnrichedSkills(): EnrichedSkillsManifest {
   const manifest = getSkillsManifest();
 
   // Build lookup: skill name (lowercase) → slugs

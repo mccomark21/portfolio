@@ -16,12 +16,8 @@ export async function generateStaticParams() {
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
 
-  let post;
-  try {
-    post = getPostBySlug(slug);
-  } catch {
-    notFound();
-  }
+  const post = getPostBySlug(slug);
+  if (!post) notFound();
 
   if (!post.frontmatter.published) notFound();
 
