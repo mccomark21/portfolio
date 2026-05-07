@@ -1,0 +1,64 @@
+---
+title: "Building Fantasy Edge: One App to Rule My Fantasy Baseball Leagues"
+date: "2026-04-03"
+summary: "How I went from juggling four browser tabs during waiver wire pickups to building a single, fully client-side research tool that blends Yahoo roster data, StatCast metrics, pitcher rankings, and multi-source prospect lists — powered by DuckDB WASM running entirely in the browser."
+repoUrl: "https://github.com/mccomark21/yahoo-fantasy-baseball-eval-app"
+techStack: ["React", "TypeScript", "Vite", "DuckDB WASM", "TanStack Table", "Tailwind CSS", "shadcn/ui", "Cheerio"]
+published: true
+needsReview: false
+---
+
+## The Problem
+
+Fantasy baseball is a game of margins. The difference between winning and losing a week often comes down to a single waiver wire pickup — the right pitcher streaming on a favorable matchup, a breakout prospect just called up, a hitter on a hot streak. I play in multiple Yahoo leagues simultaneously, which compounds the problem: the same decision has to be made with a different roster context each time.
+
+For a long time, my research process looked like this: Yahoo Fantasy open in one tab, Baseball Savant in another, Pitcher List in a third, and MLB Pipeline in a fourth. I'd manually cross-reference player names across all of them, mentally adjusting for which players I actually owned versus which were available. It was slow, error-prone, and honestly kind of miserable for something that's supposed to be fun.
+
+I'm a software engineer. I build tools for a living. Eventually the frustration crossed the threshold and I just built the thing.
+
+## The Personal Stakes
+
+I've played fantasy baseball for over a decade. It's the hobby that never fully leaves — there's always a trade to evaluate, a streamer to find, a prospect to target before he gets hyped. The analytical side of the game is what keeps me engaged year after year: the xwOBA trends, the batted ball profiles, the pitching mechanics behind an ERA regression.
+
+Building Fantasy Edge let me apply the same craft I bring to work to something I genuinely care about. It's one of those rare projects where the problem domain is intrinsically motivating, which meant I kept iterating past the "good enough" point into something I'm actually proud of.
+
+## The Data Blending Challenge
+
+The hardest part wasn't the UI — it was unifying four fundamentally different data shapes into a single coherent picture.
+
+**Yahoo Fantasy** provides roster context: who I own, in which league, at which position. This data comes via a separate companion repo ([yahoo-fantasy-data-hub](https://github.com/mccomark21/yahoo-fantasy-data-hub)) that exports CSV snapshots. The tricky part is that the same player can appear across multiple leagues, and those memberships need to stay distinct rather than collapsing.
+
+**PyBaseball / StatCast** provides the hitter metrics I actually care about: xwOBA, batted ball events, pull air percentage, walk-to-strikeout ratio. This data lives as Parquet files from a separate [pybaseball-data-hub](https://github.com/mccomark21/pybaseball-data-hub) repo, supporting multiple time windows — season-to-date, last 30 days, last 14 days, last 7 days. Z-score normalization and a PA confidence multiplier run at query time so the composite scores reflect the current filtered group, not a static dataset.
+
+**Pitcher List** rankings are scraped HTML, not a clean API. I wrote Cheerio-based scrapers that parse the weekly SP Top 100 and RP ranking tables into JSON snapshots. The production build bakes these into static files under `dist/api/`; local development uses Vite middleware that hits the live site. A rolling 8-snapshot history powers the trend sparklines on each pitcher row.
+
+**Prospect rankings** from MLB Pipeline, FanGraphs, and Prospects Live are aggregated into a consensus list. Average rank, highest/lowest rank, and rank standard deviation give a multi-source confidence picture. Minor league stats with trend indicators (🔥/🧊/➖ per time window) surface who's actually performing right now rather than just who scouts like on paper.
+
+## The Technical Payoff: DuckDB WASM
+
+The architecture decision I'm most happy with is running [DuckDB WASM](https://duckdb.org/docs/api/wasm/overview) entirely in the browser. There's no backend server, no API, no database to manage. The app fetches CSV and Parquet files at startup, caches them in IndexedDB with a 4-hour TTL, and then runs full SQL joins and aggregations against them in-browser.
+
+This means the hitter composite scoring — z-score normalization, PA confidence multipliers, weighted blending — runs as a SQL query that responds instantly to filter changes. Switching league, adjusting the time window, or toggling a position filter re-queries the in-memory DuckDB instance in milliseconds. There's no round-trip to a server, no stale cache to invalidate, no infrastructure to pay for.
+
+It's also GitHub Pages compatible. The entire app deploys as static files. Two scheduled GitHub Actions workflows refresh the pitcher and prospect snapshots weekly (Tuesday for SP, Friday for RP), carrying forward unchanged data so only the targeted source is re-scraped on each run.
+
+## What I'd Do Differently
+
+If I were starting over, I'd structure the companion data repos differently. Having Yahoo roster exports and PyBaseball Parquet files living in separate repos made the initial setup clean but adds friction when onboarding or debugging the full pipeline. A monorepo with a shared ingestion layer would have been smoother.
+
+I'd also think harder about the prospect stats ingestion earlier. The minor league data scraping grew organically and the threshold logic (what counts as "hot" for a hitter vs. a pitcher, what minimum innings qualify) required more calibration than I expected.
+
+## What It Actually Solved
+
+The app does what I built it to do. I can open one browser tab, select my league, and immediately see:
+
+- Which of my hitters are trending up or down by StatCast metrics
+- Where my pitchers rank relative to the available pool, with 8-week trend context
+- Which prospects in my system are performing and which are stalling
+- Which free agents are worth targeting across all four views
+
+Waiver wire decisions that used to take 20 minutes of tab-switching now take 3. In a game of margins, that's the edge.
+
+## Try It
+
+The app is live at [mccomark21.github.io/yahoo-fantasy-baseball-eval-app](https://mccomark21.github.io/yahoo-fantasy-baseball-eval-app/). The repo is open — feel free to fork it and wire up your own Yahoo leagues.
