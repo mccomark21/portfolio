@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:content": "node --input-type=module --experimental-vm-modules scripts/validate-content.mjs"
+    "validate:content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-content.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

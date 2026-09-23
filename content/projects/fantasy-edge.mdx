@@ -1,10 +1,33 @@
 ---
 title: "Fantasy Edge"
-description: "A data pipeline that blends Yahoo Fantasy roster data, Statcast stats, pitcher rankings, and prospect lists to sharpen roster decisions."
-repoUrl: "https://github.com/mccomark21/yahoo-fantasy-baseball-eval-app"
-blogSlug: "fantasy-edge"
-techStack: ["React", "TypeScript", "Vite", "DuckDB WASM", "TanStack Table", "Tailwind CSS", "shadcn/ui", "Cheerio"]
-featured: true
+summary: "A browser-based research tool that blends Yahoo Fantasy rosters with Statcast metrics, Pitcher List rankings, and aggregated prospect lists. Every query runs client-side in DuckDB WASM, so there is no backend to host. It turns four scattered sources into one roster decision."
+status: "shipped"
+featured: 1
+placeholder: false
+repo: "mccomark21/yahoo-fantasy-baseball-eval-app"
+role: "Solo"
+period:
+  start: "2026-01"
+  end: null
+metrics:
+  - label: "Sources blended"
+    value: "4"
+  - label: "Backend services"
+    value: "0"
+links:
+  writeup: "fantasy-edge"
+tags: ["data-analysis", "application"]
+techStack:
+  [
+    "React",
+    "TypeScript",
+    "Vite",
+    "DuckDB WASM",
+    "TanStack Table",
+    "Tailwind CSS",
+    "shadcn/ui",
+    "Cheerio",
+  ]
 ---
 
 Fantasy Edge is a browser-based research tool for fantasy baseball managers. It pulls Yahoo Fantasy roster data, blends it with StatCast-derived batter metrics from PyBaseball, Pitcher List SP and RP rankings, and aggregated prospect rankings from MLB Pipeline, FanGraphs, and Prospects Live — all processed entirely client-side with DuckDB WASM. No backend required.
