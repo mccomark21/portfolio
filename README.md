@@ -132,7 +132,7 @@ npm install
 npm run dev
 ```
 
-Visit http://localhost:3000 (or http://localhost:3000/portfolio if using basePath).
+Visit http://localhost:3000.
 
 ### Validate Content
 
@@ -217,21 +217,18 @@ Deployment is automated via GitHub Actions (`.github/workflows/deploy.yml`):
 1. Pushes to `main` trigger a build
 2. Next.js generates a static export to `out/`
 3. Output is deployed to `gh-pages` branch
-4. Site is served at `https://mccomark21.github.io/portfolio`
 
-The `basePath` is set to `/portfolio` by default. To deploy to a custom domain root, set:
-
-```bash
-NEXT_PUBLIC_BASE_PATH="" npm run build
-```
+The build targets the root of a domain. `basePath` is `""`, so the export is not
+served correctly from the GitHub Pages project subpath
+(`https://mccomark21.github.io/portfolio`). A custom domain must be configured
+for the deployed site to resolve its assets.
 
 ### Configuration
 
 Key settings in `next.config.ts`:
 
 - `output: "export"` — Static export mode
-- `basePath: "/portfolio"` — GitHub Pages subpath (configurable via env var)
-- `assetPrefix: basePath` — Correct asset paths for subpath
+- `basePath: ""` — Root-relative asset paths, for a custom domain
 - `images.unoptimized: true` — Required for static export
 - `trailingSlash: true` — Consistent URL routing
 
