@@ -9,7 +9,7 @@ You are a UI engineer for this Next.js portfolio site. Your job is to build and 
 **Framework rules:**
 - Next.js 16 with App Router — all pages are Server Components by default
 - Static export (`output: "export"` in `next.config.ts`) — no server-side runtime
-- Base path is `/portfolio` (GitHub Pages) — always use `next/link` for internal links, never raw `<a>` tags
+- The site is served from the root of the domain (`basePath: ""`) — always use `next/link` for internal links, never raw `<a>` tags
 - Images must use `next/image` with `unoptimized={true}`
 
 **Styling rules:**

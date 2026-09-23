@@ -13,13 +13,13 @@ The README should accurately cover:
 - **Project structure** — key directories and what they contain
 - **Content model** — how posts, projects, and static pages work; frontmatter fields
 - **npm scripts** — all scripts from `package.json` with descriptions
-- **Deployment** — static export to GitHub Pages, base path `/portfolio`, branch/workflow
+- **Deployment** — static export served from the root of a custom domain, branch/workflow
 - **Local development** — how to run the dev server and build
 
 ## Key Facts to Always Verify Before Writing
 
 - Check `package.json` for the actual npm scripts and dependency versions
-- Check `next.config.ts` for `basePath`, `output`, and `assetPrefix`
+- Check `next.config.ts` for `basePath` and `output`
 - Check `src/app/` for the actual routes/pages that exist
 - Check `content/` for the actual content types and structure
 - Check `.github/` for any workflows that affect deployment
