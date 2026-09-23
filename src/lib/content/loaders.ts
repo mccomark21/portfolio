@@ -79,6 +79,10 @@ export interface ProjectMeta {
   frontmatter: ProjectFrontmatter;
 }
 
+export interface Project extends ProjectMeta {
+  content: string;
+}
+
 export function getAllProjects(): ProjectMeta[] {
   const dir = path.join(CONTENT_ROOT, "projects");
   return readMdxDir(dir).map((file) => {
@@ -86,6 +90,14 @@ export function getAllProjects(): ProjectMeta[] {
     const { data } = matter(raw);
     return { slug: toSlug(file), frontmatter: ProjectFrontmatterSchema.parse(data) };
   });
+}
+
+export function getProjectBySlug(slug: string): Project | null {
+  const filePath = path.join(CONTENT_ROOT, "projects", `${slug}.mdx`);
+  if (!fs.existsSync(filePath)) return null;
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const { data, content } = matter(raw);
+  return { slug, frontmatter: ProjectFrontmatterSchema.parse(data), content };
 }
 
 // ---------------------------------------------------------------------------
