@@ -11,6 +11,9 @@
   --color-text-light: #f2f2f2;
   --color-footer-secondary: #a8d8db;
   --color-card-border: rgba(13, 92, 99, 0.15);
+  /* Fixture content. Warm enough to read as a warning against the teal. */
+  --color-placeholder: #fbeecc;
+  --color-placeholder-border: #c9a227;
 }
 
 @theme inline {

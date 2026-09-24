@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-content.mjs"
+    "validate:content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/validate-content.mjs",
+    "check:placeholders": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-placeholders.mjs",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
