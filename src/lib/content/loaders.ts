@@ -13,6 +13,7 @@ import {
   type SkillsManifest,
   type WatchedRepo,
 } from "./schemas";
+import { isVisible } from "./visibility";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
@@ -85,11 +86,13 @@ export interface Project extends ProjectMeta {
 
 export function getAllProjects(): ProjectMeta[] {
   const dir = path.join(CONTENT_ROOT, "projects");
-  return readMdxDir(dir).map((file) => {
-    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
-    const { data } = matter(raw);
-    return { slug: toSlug(file), frontmatter: ProjectFrontmatterSchema.parse(data) };
-  });
+  return readMdxDir(dir)
+    .map((file) => {
+      const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+      const { data } = matter(raw);
+      return { slug: toSlug(file), frontmatter: ProjectFrontmatterSchema.parse(data) };
+    })
+    .filter((p) => isVisible(p.frontmatter));
 }
 
 export function getProjectBySlug(slug: string): Project | null {
@@ -97,7 +100,13 @@ export function getProjectBySlug(slug: string): Project | null {
   if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
-  return { slug, frontmatter: ProjectFrontmatterSchema.parse(data), content };
+  const frontmatter = ProjectFrontmatterSchema.parse(data);
+
+  // A hidden placeholder reads as absent, so the page 404s rather than
+  // rendering fixture content at a real URL.
+  if (!isVisible(frontmatter)) return null;
+
+  return { slug, frontmatter, content };
 }
 
 // ---------------------------------------------------------------------------

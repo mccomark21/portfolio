@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PlaceholderBadge from "./PlaceholderBadge";
 import type { ProjectFrontmatter } from "@/lib/content/schemas";
 
 interface Props {
@@ -12,7 +13,8 @@ const STATUS_LABEL: Record<ProjectFrontmatter["status"], string> = {
 };
 
 export default function ProjectCard({ slug, frontmatter }: Props) {
-  const { links, metrics, repo, status, summary, techStack, title } = frontmatter;
+  const { links, metrics, placeholder, repo, status, summary, techStack, title } =
+    frontmatter;
 
   return (
     <div className="group flex flex-col rounded-2xl border border-[var(--color-card-border)] bg-[var(--color-bg-primary)] p-6 hover:bg-[var(--color-bg-accent)] transition-colors">
@@ -22,9 +24,12 @@ export default function ProjectCard({ slug, frontmatter }: Props) {
             {title}
           </Link>
         </h3>
-        <span className="shrink-0 text-xs text-[var(--color-nav)] bg-[var(--color-bg-teal)] px-2 py-0.5 rounded-full border border-[var(--color-card-border)]">
-          {STATUS_LABEL[status]}
-        </span>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+          {placeholder && <PlaceholderBadge />}
+          <span className="text-xs text-[var(--color-nav)] bg-[var(--color-bg-teal)] px-2 py-0.5 rounded-full border border-[var(--color-card-border)]">
+            {STATUS_LABEL[status]}
+          </span>
+        </div>
       </div>
 
       <p className="text-[var(--color-text-dark)]/85 text-sm flex-1 mb-4">{summary}</p>

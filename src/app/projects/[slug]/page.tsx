@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx/MdxComponents";
+import PlaceholderBadge from "@/components/PlaceholderBadge";
 import { getAllProjects, getProjectBySlug } from "@/lib/content/loaders";
 import type { ProjectFrontmatter } from "@/lib/content/schemas";
 
@@ -30,7 +31,7 @@ export default async function ProjectPage({ params }: Props) {
   if (!project) notFound();
 
   const { frontmatter, content } = project;
-  const { links, metrics, period, repo, role, status, summary, tags, techStack, title } =
+  const { links, metrics, period, placeholder, repo, role, status, summary, tags, techStack, title } =
     frontmatter;
 
   return (
@@ -38,6 +39,7 @@ export default async function ProjectPage({ params }: Props) {
       {/* Layer 1 — the skim. Everything a reader needs in one screen. */}
       <header className="mb-10">
         <div className="flex flex-wrap items-center gap-3 mb-2">
+          {placeholder && <PlaceholderBadge />}
           <span className="text-xs text-[var(--color-nav)] bg-[var(--color-bg-teal)] px-2 py-0.5 rounded-full border border-[var(--color-card-border)]">
             {STATUS_LABEL[status]}
           </span>

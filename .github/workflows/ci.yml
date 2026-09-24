@@ -32,5 +32,13 @@ jobs:
       - name: Validate content
         run: npm run validate:content
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
+
+      # INCLUDE_PLACEHOLDERS stays unset here. A pull request that would put
+      # fixture content on the live site fails at this step.
+      - name: Check for placeholder content
+        run: npm run check:placeholders
