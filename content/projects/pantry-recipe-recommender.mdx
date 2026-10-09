@@ -1,0 +1,21 @@
+---
+title: "Pantry Recipe Recommender"
+summary: "A recipe suggester that starts from what is already in the kitchen instead of from a craving. It embeds ingredients and recipes in the same space and ranks recipes by how few items you would need to buy. The ranking works, and the ingredient list is still tedious to keep current."
+status: "exploration"
+placeholder: true
+role: "Solo"
+period:
+  start: "2026-05"
+  end: "2026-07"
+metrics: []
+tags: ["model", "application"]
+techStack: ["Python", "PyTorch", "sentence-transformers", "FastAPI", "React", "TypeScript"]
+---
+
+Most recipe sites assume you will shop for the recipe. I usually want the opposite: given half a bag of spinach, some feta, and eggs, what can I make tonight?
+
+The recommender works from a public set of about 60,000 recipes. Ingredient names are messy, so the first step normalizes them: "2 cups baby spinach, washed" becomes "spinach". A sentence-transformer model embeds each normalized ingredient, which lets the ranker treat "scallion" and "green onion" as the same thing and "kale" as a reasonable stand-in for "spinach".
+
+Each recipe gets a score from the share of its ingredients the pantry covers, with a penalty for each missing item weighted by how central that item is to the dish. Salt and oil cost almost nothing to miss. The main protein costs a lot.
+
+A small React front end lets me tick items off a pantry list and see the top twenty recipes update as I go. The ranking is good enough that I use it a couple of times a week. The pantry list is the weak point, because I forget to update it, and a scanner for barcodes or receipts would do more for the project than any model change.

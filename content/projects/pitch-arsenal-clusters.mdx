@@ -1,0 +1,26 @@
+---
+title: "Pitch Arsenal Clusters"
+summary: "An unsupervised look at how major-league pitchers group by the shape of their pitch mix, using a season of Statcast pitch data. Clustering on velocity, spin, and movement separates familiar archetypes and a few surprising ones. It is an exploration, not a finished scouting tool."
+status: "exploration"
+placeholder: true
+repo: "mccomark21/pybaseball-data-hub"
+role: "Solo"
+period:
+  start: "2025-05"
+  end: "2025-06"
+metrics:
+  - label: "Pitchers clustered"
+    value: "612"
+  - label: "Clusters"
+    value: "9"
+tags: ["model", "data-analysis"]
+techStack: ["Python", "pandas", "scikit-learn", "DuckDB", "pybaseball", "Plotly"]
+---
+
+Broadcasts describe pitchers with a handful of labels: power arm, sinkerballer, soft-tosser. I wanted to see whether those labels fall out of the data on their own.
+
+I pulled one season of pitch-level Statcast data with pybaseball and kept every pitcher with at least 500 pitches. For each pitcher, I built a profile: usage share of each pitch type, average velocity and spin for each, and horizontal and vertical movement relative to the pitcher's own fastball. Normalizing movement against the fastball mattered. Without it, the clusters split mostly on arm angle.
+
+A Gaussian mixture model with nine components fit best by BIC. Several clusters match the broadcast labels closely. Others do not. One cluster holds relievers who throw two pitches with nearly identical spin axes but very different speeds, a pattern that the usual labels lump together with ordinary fastball-slider relievers.
+
+The open question is stability. Re-running on a different season moves about a fifth of pitchers to a different cluster, and I have not yet separated real changes in approach from noise in the fit.

@@ -1,0 +1,33 @@
+---
+title: "Library Holds Analysis"
+summary: "An analysis of three years of hold requests at a county library system, written to guide how many copies of new titles to buy. It models how long a hold queue lasts as a function of copies, loan period, and early demand. The purchasing team now uses a simple ratio chart instead of a gut call."
+status: "shipped"
+placeholder: true
+role: "Volunteer analyst"
+period:
+  start: "2025-09"
+  end: "2025-12"
+metrics:
+  - label: "Hold records"
+    value: "410K"
+  - label: "Median wait cut"
+    value: "6 weeks -> 4 weeks"
+tags: ["data-analysis"]
+techStack: ["R", "tidyverse", "ggplot2", "SQL", "Quarto"]
+---
+
+## Background
+
+Patrons place holds on popular new books, and the library buys extra copies when the queue gets long. The purchasing team had a rule of thumb, one copy for every six holds, but nobody knew where it came from or whether it still fit a system that had moved to a 14-day loan.
+
+## What I did
+
+The library shared an anonymized export of every hold placed over three years: title, format, date placed, date filled, and branch. I joined it to the purchase history to get the number of copies in circulation on each day.
+
+For each title, the important quantity is the ratio of holds in the first two weeks to copies on order. I fit a simple model of how many days the queue lasts given that ratio and the loan period. The fit was good for print books and poor for audiobooks, where a few heavy users account for a large share of holds.
+
+## The result
+
+The old six-to-one rule worked well for the 21-day loan period it was built for. Under the 14-day loan, eight to one gives the same median wait. For high-demand titles, the bigger gain came from ordering the extra copies in the first week instead of the fourth, which cut the median wait from about six weeks to about four.
+
+The deliverable was a one-page chart and a short Quarto report with the code, so the next volunteer can rerun it.

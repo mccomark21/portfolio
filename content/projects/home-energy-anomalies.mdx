@@ -1,0 +1,25 @@
+---
+title: "Home Energy Anomalies"
+summary: "An ongoing experiment in spotting unusual electricity use from a smart meter's fifteen-minute readings. A seasonal baseline plus a residual threshold catches things like a stuck sump pump or a dehumidifier left on. It runs on a Raspberry Pi and sends a phone notification when something looks off."
+status: "exploration"
+placeholder: true
+role: "Solo"
+period:
+  start: "2026-03"
+  end: null
+metrics:
+  - label: "Readings per day"
+    value: "96"
+  - label: "Alerts confirmed"
+    value: "7 of 11"
+tags: ["model", "data-analysis"]
+techStack: ["Python", "pandas", "statsmodels", "DuckDB", "Grafana", "Raspberry Pi"]
+---
+
+The utility's app shows a bar chart of monthly use. By the time a bar looks tall, the money is already spent.
+
+My meter exposes fifteen-minute readings through the utility's data download. A cron job on a Raspberry Pi pulls them every morning into DuckDB. The model is deliberately simple: an STL decomposition separates the daily and weekly cycles from the trend, and a reading is flagged when the residual stays above a rolling threshold for more than an hour. A single spike from the oven is not an anomaly. Two hours of steady extra draw at 3 a.m. probably is.
+
+Eleven alerts so far. Seven had a real cause I could find, including a sump pump float switch that stuck after a storm and a space heater left on in the garage. Four were false alarms, mostly on days when we had guests.
+
+The next step is weather. Cooling load follows outdoor temperature closely, and the current baseline treats a heat wave as an anomaly.

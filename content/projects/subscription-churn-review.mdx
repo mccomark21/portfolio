@@ -1,0 +1,29 @@
+---
+title: "Subscription Churn Review"
+summary: "A one-time analysis of why customers cancelled a meal-kit subscription in their first ninety days. It joined billing, delivery, and support-ticket data to find the moments that preceded a cancellation. The headline finding was that a single late delivery in the first month mattered more than price."
+status: "shipped"
+placeholder: true
+role: "Analyst, contract"
+period:
+  start: "2024-06"
+  end: "2024-08"
+metrics: []
+tags: ["data-analysis"]
+techStack: ["SQL", "Python", "pandas", "Snowflake", "Tableau"]
+---
+
+## The question
+
+The product team believed price was the main reason new customers cancelled. They had planned a discount for the second and third boxes. Before they spent the money, they wanted to know if the data agreed.
+
+## Approach
+
+I built one row per customer for every customer who signed up over twelve months, about 48,000 in total. Each row carried what happened to that customer in their first ninety days: boxes delivered, deliveries that arrived late, support tickets and their categories, plan changes, skipped weeks, and whether and when they cancelled.
+
+Survival curves split by each event were the clearest view. Customers whose first or second box arrived late cancelled at almost twice the rate of everyone else over the following month. A support ticket about a missing ingredient had a similar, smaller effect. Customers who used the skip feature at least once churned less, not more, which surprised the team.
+
+Price sensitivity was real but smaller than expected. Customers on the cheapest plan cancelled only slightly more often than those on the mid-tier plan once delivery problems were accounted for.
+
+## Outcome
+
+The team shelved the discount and put the budget into a delivery-partner change for the two regions with the worst on-time rates. The analysis ended with a handoff deck and a set of documented queries, and I was not involved after that, so I cannot report the effect.

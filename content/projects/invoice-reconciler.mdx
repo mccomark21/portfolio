@@ -1,0 +1,33 @@
+---
+title: "Invoice Reconciler"
+summary: "An internal tool that matches supplier invoices against purchase orders and goods receipts for a small manufacturing business. It clears the easy matches automatically and puts the rest in a review queue with the reason each one failed. Month-end close went from four days to under two."
+status: "shipped"
+placeholder: true
+role: "Developer, team of 2"
+period:
+  start: "2024-10"
+  end: "2025-01"
+metrics:
+  - label: "Auto-matched"
+    value: "83%"
+  - label: "Month-end close"
+    value: "4 days -> 1.5 days"
+tags: ["application"]
+techStack: ["Python", "FastAPI", "PostgreSQL", "SQL", "React", "TypeScript"]
+---
+
+## The problem
+
+Every month the accounting team received around 1,100 supplier invoices. Each one had to be matched to a purchase order and to a record that the goods actually arrived, the classic three-way match. The work happened in spreadsheets exported from the ERP, and the team spent most of the first week of each month on it.
+
+## What we built
+
+A nightly job pulls open purchase orders, receipts, and newly scanned invoices from the ERP's reporting database. A matcher tries an exact match on PO number and amount first, then a tolerance match that allows small differences in freight and rounding, then a partial match for invoices that cover only some lines of an order.
+
+Anything the matcher clears goes straight to the approved queue. Everything else lands in a review screen that says exactly why it failed: amount over tolerance, quantity received short, PO closed, or no PO found. The reviewer can accept, reject, or split an invoice across two orders with one form.
+
+## What mattered
+
+The reason codes mattered more than the match rate. Before, an unmatched invoice was just a red row. Now the team can see that most failures for one supplier are short receipts, and they call the warehouse instead of the supplier.
+
+We kept the tolerance rules in a table the accounting lead can edit, rather than in code. She changed them twice in the first month, both times for good reasons we would not have guessed.
