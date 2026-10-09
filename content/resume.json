@@ -1,0 +1,71 @@
+{
+  "name": "Mark McComiskey",
+  "headline": "Fixture headline. The launch content slice replaces it.",
+  "contact": {
+    "email": "fixture@example.com",
+    "profiles": [
+      { "label": "GitHub", "url": "https://github.com/mccomark21" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/mark-mccomisky/" }
+    ],
+    "phone": "(555) 010-0199",
+    "location": "Fixtureville, OH",
+    "placeholder": true
+  },
+  "lookingFor": {
+    "targetRoles": ["Fixture Role One", "Fixture Role Two"],
+    "summary": "Placeholder copy. This section will state the target roles and the kind of work wanted.",
+    "placeholder": true
+  },
+  "roles": [
+    {
+      "employer": "Initech Fixture Co.",
+      "title": "Fixture Analyst",
+      "location": "Fixtureville, OH",
+      "period": { "start": "2019-06", "end": "2022-02" },
+      "bullets": [
+        "Fixture bullet. An invented achievement with an invented 25% result.",
+        "Fixture bullet. A second line, to show how a list of bullets wraps on a narrow screen."
+      ],
+      "placeholder": true
+    },
+    {
+      "employer": "Acme Placeholder Analytics",
+      "title": "Fixture Senior Engineer",
+      "location": "Remote",
+      "period": { "start": "2022-03", "end": null },
+      "bullets": [
+        "Fixture bullet. This role is open, so its period ends in Present.",
+        "Fixture bullet. It is second in the file but renders first, because the page sorts by start date."
+      ],
+      "placeholder": true
+    },
+    {
+      "employer": "Globex Example Corp",
+      "title": "Fixture Intern",
+      "period": { "start": "2018-05", "end": "2018-08" },
+      "bullets": ["Fixture bullet. The oldest role, so it renders last."],
+      "placeholder": true
+    }
+  ],
+  "education": [
+    {
+      "institution": "Example State University",
+      "credential": "B.S., Fixture Studies",
+      "period": { "start": "2014-08", "end": "2018-05" },
+      "details": ["Fixture detail. An invented honour."],
+      "placeholder": true
+    }
+  ],
+  "skills": [
+    {
+      "category": "Fixture languages",
+      "items": ["Python", "SQL", "TypeScript"],
+      "placeholder": true
+    },
+    {
+      "category": "Fixture tools",
+      "items": ["Fixture Tool A", "Fixture Tool B"],
+      "placeholder": true
+    }
+  ]
+}

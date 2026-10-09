@@ -55,6 +55,24 @@ function placeholderSlugs() {
     .map((file) => file.replace(/\.mdx?$/, ""));
 }
 
+/**
+ * True when the HTML holds a placeholder badge. Every placeholder that renders
+ * carries one, so a badge in the export is a fixture on the live site.
+ */
+export function hasPlaceholderBadge(html) {
+  return html.includes("data-placeholder-badge");
+}
+
+/**
+ * The resume is one page built from content/resume.json. Its sections carry
+ * the flag one by one, so the check reads the page for a badge.
+ */
+function resumeLeaks() {
+  const page = path.join(OUT_ROOT, "resume", "index.html");
+  if (!fs.existsSync(page)) return false;
+  return hasPlaceholderBadge(fs.readFileSync(page, "utf-8"));
+}
+
 /** A project page is `out/projects/<slug>/index.html`, from trailingSlash. */
 function projectPageExists(slug) {
   return fs.existsSync(path.join(OUT_ROOT, "projects", slug, "index.html"));
@@ -76,19 +94,25 @@ function main() {
   }
 
   const leaked = findLeakedPages(slugs, projectPageExists);
+  const resumeLeaked = resumeLeaks();
 
-  if (leaked.length === 0) {
+  if (leaked.length === 0 && !resumeLeaked) {
     console.log(
-      `No placeholder reached the export. ${count(slugs.length, "placeholder project")} checked.`,
+      `No placeholder reached the export. ${count(slugs.length, "placeholder project")} and the resume checked.`,
     );
     return 0;
   }
 
-  console.error(`Placeholder content reached the export. ${count(leaked.length, "page")} found.
+  const found = leaked.length + (resumeLeaked ? 1 : 0);
+  console.error(`Placeholder content reached the export. ${count(found, "page")} found.
 `);
   for (const slug of leaked) {
     console.error(`  out/projects/${slug}/index.html`);
     console.error(`    content/projects/${slug}.mdx has placeholder: true.`);
+  }
+  if (resumeLeaked) {
+    console.error("  out/resume/index.html");
+    console.error("    content/resume.json has a section with placeholder: true.");
   }
   console.error("\nSet INCLUDE_PLACEHOLDERS=1 to build a preview that keeps them.\n");
   return 1;
