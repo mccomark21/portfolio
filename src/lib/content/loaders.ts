@@ -7,7 +7,9 @@ import {
   StaticPageFrontmatterSchema,
   SkillsManifestSchema,
   ReposManifestSchema,
+  ResumeSchema,
   type PostFrontmatter,
+  type Resume,
   type ProjectFrontmatter,
   type StaticPageFrontmatter,
   type SkillsManifest,
@@ -134,6 +136,32 @@ export function getSkillsManifest(): SkillsManifest {
   const filePath = path.join(CONTENT_ROOT, "skills.json");
   const raw = fs.readFileSync(filePath, "utf-8");
   return SkillsManifestSchema.parse(JSON.parse(raw));
+}
+
+// ---------------------------------------------------------------------------
+// Resume
+// ---------------------------------------------------------------------------
+
+/** The resume with every hidden placeholder removed. */
+export interface VisibleResume extends Omit<Resume, "contact" | "lookingFor"> {
+  contact: Resume["contact"] | null;
+  lookingFor: Resume["lookingFor"] | null;
+}
+
+export function getResume(): VisibleResume {
+  const filePath = path.join(CONTENT_ROOT, "resume.json");
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const resume = ResumeSchema.parse(JSON.parse(raw));
+
+  // The same rule as the projects. A hidden placeholder reads as absent.
+  return {
+    ...resume,
+    contact: isVisible(resume.contact) ? resume.contact : null,
+    lookingFor: isVisible(resume.lookingFor) ? resume.lookingFor : null,
+    roles: resume.roles.filter((r) => isVisible(r)),
+    education: resume.education.filter((e) => isVisible(e)),
+    skills: resume.skills.filter((s) => isVisible(s)),
+  };
 }
 
 // ---------------------------------------------------------------------------

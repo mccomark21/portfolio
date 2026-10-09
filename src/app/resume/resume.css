@@ -1,0 +1,64 @@
+/*
+ * Print stylesheet for /resume.
+ *
+ * scripts/build-resume-pdf.mjs prints this page to the PDF, so these rules set
+ * how the PDF looks. The rules apply only while .resume-page is in the
+ * document, so other pages print as before.
+ */
+
+/* The full contact block is for the PDF only. */
+.resume-page .print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: Letter;
+    margin: 0.5in;
+  }
+
+  /* The site navigation and footer. */
+  body:has(.resume-page) > header,
+  body:has(.resume-page) > footer {
+    display: none;
+  }
+
+  body:has(.resume-page) {
+    background: #fff;
+  }
+
+  body:has(.resume-page) > main {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* The download link, the placeholder badge, and the on-screen contact links. */
+  .resume-page .screen-only,
+  .resume-page [data-placeholder-badge] {
+    display: none;
+  }
+
+  .resume-page .print-only {
+    display: block;
+  }
+
+  /* Less space between sections, so a short resume fits on one sheet. */
+  .resume-page > header,
+  .resume-page section {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Keep one role on one page, and a heading with what follows it. */
+  .resume-page article {
+    break-inside: avoid;
+  }
+
+  .resume-page h2 {
+    break-after: avoid;
+  }
+
+  .resume-page a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

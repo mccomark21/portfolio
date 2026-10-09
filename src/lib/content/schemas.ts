@@ -74,6 +74,91 @@ export type ProjectMetric = z.infer<typeof ProjectMetricSchema>;
 export type ProjectFrontmatter = z.infer<typeof ProjectFrontmatterSchema>;
 
 // ---------------------------------------------------------------------------
+// Resume — content/resume.json
+//
+// One source of truth. /resume renders this data as HTML, and the deploy
+// workflow prints that page to the PDF. Bullets are plain text, not Markdown.
+//
+// Order in the file does not matter. The page sorts roles by `start` when it
+// renders them.
+//
+// Each section that can hold fixture content carries the `placeholder` flag
+// from visibility.ts, so a production build drops it like a fixture project.
+// ---------------------------------------------------------------------------
+const YearMonthSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Use a YYYY-MM date, for example 2024-03.");
+
+// The same shape as ProjectPeriodSchema. null means the role is still open.
+export const ResumePeriodSchema = z.object({
+  start: YearMonthSchema,
+  end: YearMonthSchema.nullable().default(null),
+});
+
+export const ResumeProfileSchema = z.object({
+  label: z.string(),
+  url: z.string().url(),
+});
+
+// The page shows `email` as a mailto link and `profiles` as links. `location`
+// appears only in the PDF, through the print stylesheet. `location` is a city
+// and region, never a street address. The resume holds no phone number.
+export const ResumeContactSchema = z.object({
+  email: z.string().email(),
+  profiles: z.array(ResumeProfileSchema).default([]),
+  location: z.string().optional(),
+  placeholder: z.boolean().default(false),
+});
+
+export const ResumeRoleSchema = z.object({
+  employer: z.string(),
+  title: z.string(),
+  location: z.string().optional(),
+  period: ResumePeriodSchema,
+  bullets: z.array(z.string()).default([]),
+  placeholder: z.boolean().default(false),
+});
+
+export const ResumeEducationSchema = z.object({
+  institution: z.string(),
+  credential: z.string(),
+  period: ResumePeriodSchema.optional(),
+  details: z.array(z.string()).default([]),
+  placeholder: z.boolean().default(false),
+});
+
+export const ResumeSkillGroupSchema = z.object({
+  category: z.string(),
+  items: z.array(z.string()),
+  placeholder: z.boolean().default(false),
+});
+
+// "What I'm looking for": the target roles and the kind of work wanted.
+export const ResumeLookingForSchema = z.object({
+  targetRoles: z.array(z.string()),
+  summary: z.string(),
+  placeholder: z.boolean().default(false),
+});
+
+export const ResumeSchema = z.object({
+  name: z.string(),
+  headline: z.string().optional(),
+  contact: ResumeContactSchema,
+  lookingFor: ResumeLookingForSchema,
+  roles: z.array(ResumeRoleSchema).default([]),
+  education: z.array(ResumeEducationSchema).default([]),
+  skills: z.array(ResumeSkillGroupSchema).default([]),
+});
+
+export type ResumePeriod = z.infer<typeof ResumePeriodSchema>;
+export type ResumeContact = z.infer<typeof ResumeContactSchema>;
+export type ResumeRole = z.infer<typeof ResumeRoleSchema>;
+export type ResumeEducation = z.infer<typeof ResumeEducationSchema>;
+export type ResumeSkillGroup = z.infer<typeof ResumeSkillGroupSchema>;
+export type ResumeLookingFor = z.infer<typeof ResumeLookingForSchema>;
+export type Resume = z.infer<typeof ResumeSchema>;
+
+// ---------------------------------------------------------------------------
 // Static page frontmatter – About, Education, Interests (optional title)
 // ---------------------------------------------------------------------------
 export const StaticPageFrontmatterSchema = z.object({

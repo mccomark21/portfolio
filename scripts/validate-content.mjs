@@ -18,6 +18,7 @@ import {
   PostFrontmatterSchema,
   ProjectFrontmatterSchema,
   ReposManifestSchema,
+  ResumeSchema,
   SkillsManifestSchema,
   StaticPageFrontmatterSchema,
 } from "../src/lib/content/schemas.ts";
@@ -144,6 +145,7 @@ const projects = validateMdxDir("projects", ProjectFrontmatterSchema);
 validateMdxDir("pages", StaticPageFrontmatterSchema);
 validateJsonFile("skills.json", SkillsManifestSchema);
 validateJsonFile("repos.json", ReposManifestSchema);
+validateJsonFile("resume.json", ResumeSchema);
 
 validateFeaturedRanks(projects);
 validateWriteupLinks(projects, new Set(posts.map((p) => p.slug)));

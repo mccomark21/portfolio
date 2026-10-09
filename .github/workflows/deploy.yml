@@ -35,6 +35,14 @@ jobs:
       - name: Check for placeholder content
         run: npm run check:placeholders
 
+      # The PDF is printed from the built /resume page, so it runs after the
+      # build and writes into out/ directly.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build resume PDF
+        run: node scripts/build-resume-pdf.mjs
+
       - name: Verify output directory
         run: |
           if [ ! -d "out" ]; then
