@@ -1,0 +1,22 @@
+---
+title: "Housing Permit Pipeline"
+summary: "A look at how long residential building permits take to move from application to approval across four neighboring counties. It cleans each county's open-data export into one schema and measures time spent at each review stage. Early results point to one stage, not the overall workload, as the source of most of the delay."
+status: "exploration"
+placeholder: true
+repo: "mccomark21/housing-permit-pipeline"
+role: "Solo"
+period:
+  start: "2025-12"
+  end: "2026-02"
+metrics: []
+tags: ["data-analysis"]
+techStack: ["Python", "pandas", "DuckDB", "dbt", "SQL", "Observable Plot"]
+---
+
+Local debates about housing often turn on how slow permits are, but each county publishes its permit data in a different shape, and nobody compares them side by side.
+
+Each of the four counties has an open-data portal with a permits table. One reports a status history, two report only the current status and a few dates, and one reports a free-text notes field that sometimes holds the history. A dbt project maps all four into one schema: a permit, its type, and a series of stage events with dates. The free-text county needed a set of regular expressions that I trust for about 80 percent of rows and exclude the rest.
+
+For single-family permits, the median time from application to approval ranges from 34 days to 97 days across the four counties. The surprising part is where the time goes. In the slowest county, more than half of the elapsed time sits in a single stage, the zoning review, while the building-code review is as fast as anywhere else.
+
+This is still an exploration. Stage definitions differ between counties, so some of the gap may come from how each county labels its steps rather than from how long the work takes.

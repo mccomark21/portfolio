@@ -1,0 +1,21 @@
+---
+title: "Receipt Line-Item Parser"
+summary: "A small model that turns a phone photo of a grocery receipt into structured line items: product, quantity, and price. It pairs an off-the-shelf OCR engine with a token classifier fine-tuned on a few hundred hand-labeled receipts. It works on clean receipts from the big chains and still struggles with crumpled thermal paper."
+status: "exploration"
+placeholder: true
+role: "Solo"
+period:
+  start: "2025-10"
+  end: "2025-11"
+metrics: []
+tags: ["model"]
+techStack: ["Python", "PyTorch", "Hugging Face Transformers", "Tesseract", "pandas"]
+---
+
+I wanted my grocery spending broken down by category without typing every receipt into a spreadsheet. Existing apps either read only the total or sent the photo to a server I did not control.
+
+The pipeline has two stages. Tesseract reads the image and returns words with their bounding boxes. A small LayoutLM-style token classifier then labels each word as part of a product name, a quantity, a unit price, a line total, or noise, using both the text and its position on the page. A few rules stitch the labeled words back into rows.
+
+I labeled 340 receipts from five stores by hand, which took most of two weekends. On held-out receipts from those same stores, about nine in ten line items come out exactly right. On a store the model has never seen, that drops to roughly six in ten, mostly because abbreviations like "GRN BNS FRZ" vary so much between chains.
+
+The weak point is the OCR, not the classifier. Faded thermal paper produces garbage that no amount of labeling can fix. The next step, if I return to it, is a better image cleanup pass before Tesseract ever sees the photo.

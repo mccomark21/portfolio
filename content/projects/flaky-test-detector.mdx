@@ -1,0 +1,25 @@
+---
+title: "Flaky Test Detector"
+summary: "A classifier that reads CI history and flags tests that fail and then pass on retry without a code change. It ranks suspects by how often they waste a pipeline run. It found most of the known flaky tests in a test repository and a few that nobody had noticed."
+status: "exploration"
+placeholder: true
+role: "Solo"
+period:
+  start: "2026-08"
+  end: null
+metrics:
+  - label: "CI runs analyzed"
+    value: "23,800"
+  - label: "Known flaky recall"
+    value: "0.87"
+tags: ["model"]
+techStack: ["Python", "scikit-learn", "pandas", "GitHub Actions", "SQL"]
+---
+
+Flaky tests cost time in two ways. Each one burns a pipeline run, and each one teaches developers to hit retry without reading the failure.
+
+The detector reads CI results from the GitHub Actions API for a set of open-source repositories with long histories. For every test, it builds features from its run history: how often it fails on a commit that later passes with no change, how its failures cluster by runner and time of day, how long it runs compared with its own median, and whether its failures share an error message.
+
+A gradient-boosted classifier, trained on tests that maintainers had already tagged as flaky, recovers 87 percent of those tags on held-out repositories. The more interesting output is the ranked list of untagged tests the model is confident about. In one repository, three of the top five turned out to depend on wall-clock time.
+
+The model still confuses genuinely flaky tests with tests that fail because of a broken dependency for a day. Adding the dependency lockfile history as a feature is the next experiment.

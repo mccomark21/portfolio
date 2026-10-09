@@ -1,0 +1,36 @@
+---
+title: "Grocery Price Tracker"
+summary: "A nightly scrape of shelf prices for about 2,000 staple items across four regional grocery chains, modeled in dbt and charted by category. It answers whether a price rise is store-wide, chain-wide, or one product. A weekly email flags the items whose price moved more than ten percent."
+status: "shipped"
+featured: 4
+placeholder: true
+role: "Solo"
+period:
+  start: "2024-09"
+  end: "2025-03"
+metrics:
+  - label: "Items tracked"
+    value: "2,140"
+  - label: "Price observations"
+    value: "1.3M"
+tags: ["data-analysis"]
+techStack: ["Python", "Playwright", "PostgreSQL", "dbt", "SQL", "Metabase"]
+---
+
+## Why
+
+Food inflation was in the news every week, but the headline number is an average over thousands of items and hundreds of cities. I wanted to know what was happening to the specific things my household buys, at the specific stores we buy them from.
+
+## How it works
+
+A Playwright job runs at 2 a.m. and walks each chain's online catalog for a fixed list of products. Matching the same product across chains was the hardest part. A "16 oz store-brand peanut butter" has a different name, image, and SKU at every store. I built the match table by hand for the first 400 items and then used a fuzzy match on brand, size, and unit to propose candidates for the rest, which I accepted or rejected in a small review script.
+
+Raw prices land in PostgreSQL. dbt models turn them into a daily fact table keyed on product, store, and date, with unit price normalized to price per ounce or per count. A sale price and a regular price are kept separately, because a two-week sale otherwise looks like a sudden drop and a sudden rise.
+
+## What it showed
+
+Most of the movement over six months came from a small number of categories: eggs, coffee, and cooking oil. The broad basket rose about four percent, which matched the official figures closely. The interesting finding was the spread between chains. On the same 300 matched items, the cheapest and most expensive chain differed by 22 percent, and that gap was steady month over month.
+
+## What I would change
+
+The scraper breaks whenever a chain redesigns its site, which happened three times. A paid price-data API would have cost less than the evenings I spent fixing selectors.

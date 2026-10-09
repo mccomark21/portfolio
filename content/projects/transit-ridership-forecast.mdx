@@ -1,0 +1,85 @@
+---
+title: "Transit Ridership Forecast"
+summary: "A daily ridership forecast for every bus route in a mid-sized transit network, built so planners can see a service change coming before the schedule goes out. Gradient-boosted models on weather, calendar, and fare-card history replaced a spreadsheet that averaged the last four weeks. Forecast error on the busiest routes fell by about a third."
+status: "shipped"
+featured: 3
+placeholder: true
+role: "Lead analyst, team of 3"
+period:
+  start: "2025-02"
+  end: "2025-08"
+metrics:
+  - label: "Routes forecast"
+    value: "41"
+  - label: "Weekday MAPE"
+    value: "18.2% -> 12.6%"
+  - label: "Refresh time"
+    value: "3 hrs -> 9 min"
+links:
+  demo: "https://transit-forecast.example.com"
+tags: ["model", "data-analysis"]
+techStack: ["Python", "pandas", "LightGBM", "DuckDB", "Airflow", "Streamlit", "SQL"]
+---
+
+## The problem
+
+Every quarter, the service planning group publishes a new bus schedule. Before they publish it, someone has to answer a deceptively simple question for each of the 41 routes: how many people will ride this route on an ordinary Tuesday three months from now, and how many on a Saturday?
+
+For years the answer came from a spreadsheet. It took the last four weeks of boardings from the fare-card system, averaged them by day of week, and nudged the result up or down by a growth factor that one planner adjusted by hand. It worked well enough in a steady year. It worked badly in any year with a school calendar change, a long stretch of bad weather, a detour, or a new apartment complex at the end of a line. Those were exactly the cases where planners most needed a good number.
+
+The spreadsheet also hid its own uncertainty. A route that carried 900 riders one week and 1,400 the next got the same confident single figure as a route that never moved. Planners had learned to distrust the numbers on certain routes, but that knowledge lived in their heads, not in the tool.
+
+The goal of this project was narrow on purpose. Build a forecast that is measurably better than the spreadsheet on the routes that matter, that shows a range instead of a point, and that refreshes without anyone touching it.
+
+## The data
+
+Three sources fed the model.
+
+The first was the fare-card tap log. Every boarding produces a row with a timestamp, a route, a stop, and a card type. Two and a half years of history came to a little over 60 million rows. Cash fares do not appear in the tap log, so we scaled each route by the ratio of farebox cash counts to taps for the same month. That ratio drifted slowly over time, from about 14 percent cash to about 9 percent, and ignoring it would have made ridership look like it was falling when it was not.
+
+The second was daily weather from the nearest airport station: high temperature, precipitation, snowfall, and snow depth. Snow depth turned out to matter more than snowfall. People adapt to a snowy morning, but a week of packed snow on the sidewalks changes how they travel.
+
+The third was a calendar we built by hand. It marked public school days, the two university terms, federal holidays, the days around holidays, and the dates of large events downtown. Building it took longer than any modeling step.
+
+All three went into DuckDB. We aggregated taps to route-day counts with a single SQL view, which cut 60 million rows down to roughly 38,000 and made every later step fast enough to run on a laptop.
+
+## Choosing a model
+
+We tried four approaches in order of complexity, and kept a simple scorecard for each: mean absolute percentage error on weekdays and on weekends, measured on a rolling twelve-week holdout.
+
+The baseline was the spreadsheet itself, reproduced in Python so that it could be scored on the same holdout. It came in at 18.2 percent weekday error.
+
+A per-route linear model with calendar and weather terms was the first real improvement, at around 14 percent. It was easy to explain and easy to break. Adding interaction terms for weather and day type helped, then hurt, as the number of terms grew faster than the data on the smaller routes could support.
+
+The final model was a single LightGBM regressor trained across all routes at once, with the route as a categorical feature. Pooling the routes was the decision that mattered most. A small route with two years of noisy history could borrow structure from the large routes with similar riders: the model learned that university routes collapse during the winter break, and it applied that pattern to a small shuttle route that had only seen one winter break in its history.
+
+Weekday error on the twelve-week holdout came to 12.6 percent. On the ten busiest routes, which carry most of the riders and most of the planning risk, error fell from about 15 percent to about 10.
+
+## Showing uncertainty
+
+A point forecast was not enough. We trained two more LightGBM models with a quantile loss at the 10th and 90th percentiles, which gave each forecast an 80 percent band. The bands were not perfectly calibrated at first. Across the holdout, about 71 percent of actual values landed inside the 80 percent band, which meant the bands were too narrow. A simple per-route widening factor, fit on a separate validation window, brought coverage to 79 percent.
+
+The bands changed the conversation with planners more than the accuracy gain did. A route with a wide band was now visibly uncertain. One planner said that the band on a particular crosstown route finally explained why she never trusted its number.
+
+## Delivery
+
+The forecast runs nightly in Airflow. One task pulls the previous day's taps, one refreshes the weather, one retrains on Sunday nights and scores every other night. The full refresh takes about nine minutes, against roughly three hours of manual work each quarter under the old process, most of which was copying and pasting between workbooks.
+
+Planners see the results in a small Streamlit app. Each route has a chart of the last six months of actual ridership, the forecast for the next ninety days, and the band. A table under the chart lists the five days where the model is least certain and the main reason, taken from the feature contributions: a holiday, a forecast snowstorm, the first week of a school term.
+## What went wrong
+
+Two things went wrong, and both were about data, not models.
+
+The first was a fare-card system migration midway through the project. For eleven days, taps on two routes were recorded under the wrong route code. The model saw one route collapse and another spike, and it dutifully learned that this was normal. We caught it only because the forecast for one of those routes suddenly widened. After that, we added a check that compares each route's daily taps against its own trailing distribution and flags anything more than four standard deviations out before training.
+
+The second was the calendar. We had marked the university spring break on the wrong week for one year of history. The model's error on the routes near campus jumped that week, and the feature contributions pointed straight at the calendar. Building the calendar by hand was the right call, but it needed the same review as any other input.
+
+## What I learned
+
+Pooling across related series beat building one careful model per series. That held even though the per-route linear models were easier to explain.
+
+The uncertainty band did more for adoption than the accuracy gain. People will forgive a forecast that is wrong in a way it warned them about.
+
+Most of the work was in the inputs: the cash-fare adjustment, the hand-built calendar, the migration check. The model itself was a small part of the codebase and the easiest part to change.
+
+If I did it again, I would build the anomaly check on day one, not after the first bad week, and I would put the calendar in a reviewed file with its own tests instead of in a spreadsheet tab that one person maintained.

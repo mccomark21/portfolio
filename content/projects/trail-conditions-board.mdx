@@ -1,0 +1,18 @@
+---
+title: "Trail Conditions Board"
+summary: "A small mobile-first web app where hikers post the current state of local trails: mud, ice, downed trees, or clear. Reports expire after a few days so the board never shows stale news. It is a side project with a handful of regular users."
+status: "exploration"
+placeholder: true
+role: "Solo"
+metrics: []
+tags: ["application"]
+techStack: ["TypeScript", "React", "Vite", "Supabase", "Leaflet", "Tailwind CSS"]
+---
+
+The official park pages say a trail is open or closed. They do not say that the north loop is ankle-deep mud after yesterday's rain. That kind of news travels through group chats and gets lost.
+
+The app shows a map of about forty trailheads. Tapping one shows the latest reports, each with a condition, an optional photo, and the time it was posted. Reports fade after three days and disappear after seven. Anyone can read the board. Posting needs a magic-link sign-in so that spam stays manageable.
+
+Supabase handles auth, storage for photos, and a Postgres table of reports with row-level security, so a user can only edit their own posts. The map uses Leaflet with OpenStreetMap tiles.
+
+The biggest open problem is trust. Two reports for the same trail on the same afternoon sometimes disagree. I am experimenting with showing the agreement between recent reports instead of only the newest one.

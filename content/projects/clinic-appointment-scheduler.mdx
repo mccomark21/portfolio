@@ -1,0 +1,38 @@
+---
+title: "Clinic Appointment Scheduler"
+summary: "A web app that lets a three-provider physical therapy clinic book, reschedule, and remind patients without a phone call. It replaced a shared paper calendar and a voicemail box. No-shows dropped after automatic text reminders went live."
+status: "shipped"
+featured: 5
+placeholder: true
+role: "Full-stack developer"
+period:
+  start: "2024-03"
+  end: "2024-07"
+metrics:
+  - label: "No-show rate"
+    value: "14% -> 6%"
+  - label: "Bookings per week"
+    value: "~180"
+tags: ["application"]
+techStack: ["TypeScript", "React", "Next.js", "PostgreSQL", "Prisma", "Twilio", "Tailwind CSS"]
+---
+
+## The clinic
+
+The clinic had three physical therapists, one front-desk coordinator, and a paper calendar that lived next to the phone. Every booking, change, and cancellation went through the coordinator. When she was out sick, the calendar effectively stopped.
+
+## What I built
+
+Patients get a link that shows open slots for their therapist over the next three weeks. They pick one, confirm with a code sent to their phone, and receive a reminder text the day before. Replying "C" to the reminder cancels the slot and returns it to the open pool, which the coordinator sees immediately.
+
+The therapists asked for one thing above all: no double bookings, ever. Every slot is a row with a unique constraint on provider and start time, and booking happens in a single transaction that either claims the row or fails. A failed claim shows the patient the next three open slots instead of an error.
+
+## The hard parts
+
+Recurring appointments were harder than expected. Many patients come twice a week for six weeks, and a single holiday or vacation week breaks the pattern. I modeled a series as a parent record with individual child appointments, so that moving one visit never silently moved the rest.
+
+Time zones did not matter for the patients, but they mattered for the reminder job, which ran on a server in a different zone and sent the first week of reminders an hour early.
+
+## Outcome
+
+After two months, the no-show rate fell from about 14 percent to about 6 percent. The coordinator now spends her mornings on insurance paperwork rather than on the phone.
