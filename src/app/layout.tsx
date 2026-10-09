@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
-import { NAV_ROUTES, SITE_METADATA } from "@/lib/routes";
+import { NAV_ROUTES, SITE_METADATA, SOCIAL_LINKS } from "@/lib/routes";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -39,6 +39,15 @@ export default function RootLayout({
         <main className="max-w-5xl mx-auto px-4 py-12">{children}</main>
         <footer className="border-t border-[var(--color-card-border)] mt-20 bg-[var(--color-nav)]">
           <div className="max-w-5xl mx-auto px-4 py-6 text-center text-[var(--color-text-light)] text-sm">
+            <ul className="flex justify-center gap-4 mb-2">
+              {SOCIAL_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
             Built with Next.js · Hosted on GitHub Pages
             <p className="text-[var(--color-footer-secondary)] mt-1">Portfolio</p>
           </div>

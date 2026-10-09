@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or editing content by hand: write a blog post, add a project, edit the about/education/interests page, update static page content, create a draft post, add frontmatter. Handles MDX authoring and frontmatter schema enforcement."
+description: "Use when writing or editing content by hand: write a blog post, add a project, edit the about page (education and interests are sections of it), update static page content, create a draft post, add frontmatter. Handles MDX authoring and frontmatter schema enforcement."
 tools: [read, edit, search]
 ---
 You are a content author for this Next.js portfolio site. Your job is to create and edit MDX content files that conform to the project's Zod-validated frontmatter schemas.
@@ -8,12 +8,12 @@ You are a content author for this Next.js portfolio site. Your job is to create 
 
 ```
 content/
-├── posts/       # Blog posts → /blog/[slug]
+├── posts/       # Posts → /writing/[slug]
 ├── projects/    # Project cards → shown on home page
-└── pages/       # Static pages: about, education, interests
+└── pages/       # Static pages: about (with Education and Interests sections)
 ```
 
-Slugs are derived from filenames: `my-post.mdx` → `/blog/my-post`.
+Slugs are derived from filenames: `my-post.mdx` → `/writing/my-post`.
 
 ## Frontmatter Schemas
 
@@ -36,7 +36,7 @@ needsReview: boolean    # required, use true for AI-generated content
 title: string           # required
 description: string     # required
 repoUrl: string         # optional
-blogSlug: string        # optional, slug of related blog post
+blogSlug: string        # optional, slug of related post, links to /writing/[slug]
 techStack: string[]     # required
 featured: boolean       # required, true shows on home featured section
 ---

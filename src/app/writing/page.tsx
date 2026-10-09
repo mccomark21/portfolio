@@ -1,19 +1,19 @@
 import { getAllPosts } from "@/lib/content/loaders";
 import Link from "next/link";
 
-export default function BlogPage() {
+export default function WritingPage() {
   const posts = getAllPosts();
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[var(--color-text-dark)] mb-8">Blog</h1>
+      <h1 className="text-3xl font-bold text-[var(--color-text-dark)] mb-8">Writing</h1>
       {posts.length === 0 && (
         <p className="text-[var(--color-text-dark)]/80">No posts published yet — check back soon.</p>
       )}
       <div className="space-y-8">
         {posts.map(({ slug, frontmatter }) => (
           <article key={slug} className="border-b border-[var(--color-card-border)] pb-8">
-            <Link href={`/blog/${slug}`}>
+            <Link href={`/writing/${slug}`}>
               <h2 className="text-xl font-semibold text-[var(--color-text-dark)] hover:text-[var(--color-nav)] transition-colors">
                 {frontmatter.title}
               </h2>
