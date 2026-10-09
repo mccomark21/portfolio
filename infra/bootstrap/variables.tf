@@ -29,12 +29,12 @@ variable "site_bucket_name" {
 }
 
 variable "distribution_arn" {
-  description = "ARN of the one CloudFront distribution the deploy role can invalidate. Leave null until the site stack (#12) exists, then set it and apply again."
+  description = "The ARN of the one CloudFront distribution that the deploy role can invalidate. Keep it null until the site stack (#12) exists. Then set it. Then apply this stack again."
   type        = string
   default     = null
 
   validation {
     condition     = var.distribution_arn == null || can(regex("^arn:aws:cloudfront::[0-9]{12}:distribution/[A-Z0-9]+$", var.distribution_arn))
-    error_message = "distribution_arn must name one distribution, as arn:aws:cloudfront::<account>:distribution/<ID>. A wildcard is not allowed."
+    error_message = "distribution_arn must name one distribution, as arn:aws:cloudfront::<account>:distribution/<ID>. This validation rejects a wildcard."
   }
 }

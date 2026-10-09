@@ -4,7 +4,7 @@ output "state_bucket" {
 }
 
 output "terraform_role_arn" {
-  description = "Role to assume for the site stack. Put it in the portfolio-terraform AWS CLI profile."
+  description = "The role to assume for the site stack. Put it in the AWS CLI profile named portfolio-terraform."
   value       = aws_iam_role.terraform.arn
 }
 

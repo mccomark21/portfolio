@@ -2,7 +2,8 @@
 #
 # The trust policy pins one repository and one branch with StringEquals. A
 # wildcard in `sub` lets any GitHub repository assume the role, which is the
-# most common way a personal AWS account is drained through Actions.
+# most common way that GitHub Actions drains a personal AWS account, as the
+# refactor plan (task 1.8) states.
 
 locals {
   github_oidc_host = "token.actions.githubusercontent.com"

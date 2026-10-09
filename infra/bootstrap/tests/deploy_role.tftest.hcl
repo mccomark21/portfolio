@@ -35,7 +35,7 @@ run "deploy_trust_pins_repository_and_branch" {
         "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
       }
     }
-    error_message = "The deploy trust must pin sub and aud with StringEquals and no other condition."
+    error_message = "The deploy trust policy must pin sub and aud with StringEquals and no other condition."
   }
 
   assert {

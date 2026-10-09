@@ -1,17 +1,19 @@
-# portfolio-terraform: assumed by a human, from the Identity Center AdminAccess
-# session behind AWS_PROFILE=portfolio, to plan and apply the site stack (#12).
+# portfolio-terraform: a human assumes it from the AdminAccess role that
+# Identity Center gives AWS_PROFILE=portfolio. It plans and applies the site
+# stack (#12).
 #
 # It is broad on the services the site stack uses, and narrow everywhere else:
 # - IAM writes reach only roles and policies named portfolio-site-*. It cannot
 #   edit itself, portfolio-deploy, or the GitHub OIDC provider.
-# - It cannot delete or weaken the state bucket that this stack owns.
+# - It cannot delete or weaken the state bucket, or delete old state versions.
 #
-# Assuming a role from an SSO session is role chaining, which AWS caps at one
-# hour whatever max_session_duration says. So the default of one hour stays.
+# AWS limits a role that another role assumes (role chaining) to a one-hour
+# session, whatever max_session_duration says. So the default of one hour stays.
 
 locals {
-  # Identity Center creates the role behind a permission set at this path,
-  # with a random suffix after the permission set name.
+  # Identity Center creates the role for a permission set at this path. The
+  # role name is the permission set name with a random suffix. The permission
+  # set must be named exactly AdminAccess.
   admin_sso_role_pattern = "arn:aws:iam::${var.account_id}:role/aws-reserved/sso.amazonaws.com/*AWSReservedSSO_AdminAccess_*"
 
   terraform_trust_policy = {
@@ -72,8 +74,16 @@ locals {
           "s3:PutBucketPublicAccessBlock",
           "s3:PutBucketOwnershipControls",
           "s3:PutEncryptionConfiguration",
+          "s3:PutLifecycleConfiguration",
         ]
         Resource = local.state_bucket_arn
+      },
+      {
+        # Versioning keeps old state only while no one can delete versions.
+        Sid      = "ProtectStateHistory"
+        Effect   = "Deny"
+        Action   = "s3:DeleteObjectVersion"
+        Resource = "${local.state_bucket_arn}/*"
       },
     ]
   }
@@ -81,7 +91,7 @@ locals {
 
 resource "aws_iam_role" "terraform" {
   name               = "portfolio-terraform"
-  description        = "Plans and applies the portfolio site stack. Assumed from the Identity Center AdminAccess session."
+  description        = "Plans and applies the portfolio site stack. The Identity Center AdminAccess role assumes it."
   assume_role_policy = jsonencode(local.terraform_trust_policy)
 }
 

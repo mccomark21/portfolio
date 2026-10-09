@@ -15,7 +15,7 @@ This stack creates the AWS resources that every other stack in `infra/` needs:
 
 | Role | Assumed by | Can do |
 | --- | --- | --- |
-| `portfolio-terraform` | The Identity Center `AdminAccess` session | S3, CloudFront, ACM, Route 53, Budgets and CloudWatch Logs. IAM writes only on `portfolio-site-*` roles and policies. It cannot weaken or delete the state bucket. |
+| `portfolio-terraform` | The Identity Center `AdminAccess` role | S3, CloudFront, ACM, Route 53, Budgets and CloudWatch Logs. IAM writes only on `portfolio-site-*` roles and policies. It cannot weaken or delete the state bucket, or delete old state versions. |
 | `portfolio-deploy` | GitHub Actions on `mccomark21/portfolio`, branch `main` only | `s3:ListBucket`, `s3:PutObject` and `s3:DeleteObject` on the site bucket. `cloudfront:CreateInvalidation` on one distribution. |
 
 The `portfolio-deploy` trust policy pins `sub` to `repo:mccomark21/portfolio:ref:refs/heads/main` and `aud` to `sts.amazonaws.com`. It has no wildcard. A wildcard in `sub` lets any GitHub repository assume the role.
@@ -57,7 +57,7 @@ Do this immediately after the first apply. Until you do it, the only copy of thi
 4. Delete the local `terraform.tfstate` and `terraform.tfstate.backup` files.
 5. Commit `backend.tf`.
 
-`use_lockfile = true` turns on S3 native state locking. It needs Terraform 1.10 or later. No DynamoDB table is needed.
+`use_lockfile = true` enables S3 native state locking. It needs Terraform 1.10 or later. No DynamoDB table is needed.
 
 ## After the site stack exists
 
@@ -72,7 +72,17 @@ Do this immediately after the first apply. Until you do it, the only copy of thi
 2. Run `terraform apply`. Expect one change, to `aws_iam_role_policy.deploy`.
 3. Commit `terraform.tfvars`. The ARN is not a secret.
 
-The site stack must create its bucket with the name in the `site_bucket_name` output, `portfolio-site-692112934115`. The deploy role is scoped to that name. Any IAM role or policy that the site stack creates must have a name that starts with `portfolio-site-`.
+## Rules for later stacks
+
+These roles work only if the later stacks follow these rules.
+
+| Rule | Stack | Reason |
+| --- | --- | --- |
+| Name the site bucket `portfolio-site-692112934115`, the `site_bucket_name` output. | #12 | The deploy role can write to that bucket name only. |
+| Encrypt the site bucket with SSE-S3, not KMS. | #12 | The deploy role has no KMS permission. |
+| Name every IAM role and policy `portfolio-site-*`. | #12 | `portfolio-terraform` can write IAM resources with that prefix only. |
+| Do not give the deploy job a GitHub `environment:`. | #13 | An environment changes the token `sub` to `repo:...:environment:<name>`, and the trust policy then rejects it. |
+| Keep the Identity Center permission set named exactly `AdminAccess`. | all | The `portfolio-terraform` trust policy matches the role name `AWSReservedSSO_AdminAccess_*`. |
 
 ## Use portfolio-terraform
 
@@ -89,7 +99,7 @@ Then run the site stack with `AWS_PROFILE=portfolio-terraform`. AWS limits a rol
 
 ## Tests
 
-`terraform test` checks the deploy role trust, the deploy role permissions and the state bucket settings. The tests use a mock AWS provider, so they make no AWS call and need no credentials.
+`terraform test` checks the deploy trust policy, the deploy permissions and the state bucket settings. The tests use a mock AWS provider, so they make no AWS call and need no credentials.
 
 ```sh
 terraform init -backend=false

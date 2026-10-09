@@ -1,5 +1,5 @@
 # Remote state for every stack in infra/. Each stack locks its state with an
-# S3 lock file (backend "s3" { use_lockfile = true }), so no DynamoDB table.
+# S3 lock file (backend "s3" { use_lockfile = true }). No DynamoDB table is needed.
 
 locals {
   state_bucket_arn = "arn:aws:s3:::${aws_s3_bucket.state.bucket}"

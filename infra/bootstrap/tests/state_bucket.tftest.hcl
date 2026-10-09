@@ -23,7 +23,7 @@ run "state_bucket_keeps_every_version" {
 
   assert {
     condition     = aws_s3_bucket_versioning.state.versioning_configuration[0].status == "Enabled"
-    error_message = "State bucket versioning must be Enabled, so a bad write can be rolled back."
+    error_message = "The state bucket must have versioning Enabled, so that an operator can restore the state after a bad write."
   }
 }
 
