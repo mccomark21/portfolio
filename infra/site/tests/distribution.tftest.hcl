@@ -6,8 +6,8 @@ mock_provider "aws" {
   source = "./tests/mocks"
 }
 
-# The budget import block cannot run against a mock provider. Its settings are
-# checked by the live plan instead.
+# The budget import block cannot run against a mock provider. The live plan
+# checks the budget instead.
 override_resource {
   target = aws_budgets_budget.monthly
 }
@@ -59,7 +59,7 @@ run "distribution_maps_404_to_the_404_page" {
         response_code      = 404
         response_page_path = "/404.html"
     }]
-    error_message = "A 404 must return /404.html with status 404, and no other error must be remapped."
+    error_message = "A 404 must return /404.html with status 404. The distribution must remap no other error."
   }
 }
 
@@ -86,12 +86,12 @@ run "distribution_redirects_http_compresses_and_runs_the_function" {
         event_type   = "viewer-request"
         function_arn = "arn:aws:cloudfront::692112934115:function/portfolio-site-viewer-request"
     }]
-    error_message = "The viewer request function must run on the default cache behavior, and it must be the only function."
+    error_message = "The viewer request function must run on the default cache behavior. No other function must run."
   }
 
   assert {
     condition     = aws_cloudfront_function.viewer_request.runtime == "cloudfront-js-2.0" && aws_cloudfront_function.viewer_request.publish
-    error_message = "The function must use cloudfront-js-2.0 and be published."
+    error_message = "The function must use cloudfront-js-2.0. Terraform must publish it."
   }
 
   assert {
@@ -119,7 +119,7 @@ run "distribution_serves_apex_and_www_over_the_certificate" {
 
   assert {
     condition     = aws_acm_certificate.site.domain_name == "markmccomiskey.com" && aws_acm_certificate.site.subject_alternative_names == toset(["www.markmccomiskey.com"]) && aws_acm_certificate.site.validation_method == "DNS"
-    error_message = "The certificate must cover the apex and www, validated by DNS."
+    error_message = "The certificate must cover the apex and www. DNS must validate it."
   }
 
   assert {

@@ -3,6 +3,8 @@
 # 90 days. The delivery writes JSON under date folders, so a later Athena
 # table (#3.3 in the plan) can partition by date.
 
+data "aws_region" "current" {}
+
 locals {
   logs_bucket_arn = "arn:aws:s3:::${aws_s3_bucket.logs.bucket}"
 }
@@ -75,7 +77,7 @@ resource "aws_s3_bucket_policy" "logs" {
             "aws:SourceAccount" = var.account_id
           }
           ArnLike = {
-            "aws:SourceArn" = "arn:aws:logs:us-east-1:${var.account_id}:delivery-source:*"
+            "aws:SourceArn" = "arn:aws:logs:${data.aws_region.current.region}:${var.account_id}:delivery-source:*"
           }
         }
       },

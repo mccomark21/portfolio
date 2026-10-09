@@ -19,7 +19,7 @@ locals {
 # The for_each keys come from configuration, so Terraform knows them at plan
 # time. The record values come from the certificate after it exists.
 resource "aws_route53_record" "certificate_validation" {
-  for_each = toset([var.domain_name, local.www_domain_name])
+  for_each = toset(local.site_domain_names)
 
   zone_id         = var.hosted_zone_id
   name            = local.validation_options[each.key].resource_record_name
@@ -38,7 +38,7 @@ resource "aws_acm_certificate_validation" "site" {
 # sends www to the apex.
 resource "aws_route53_record" "site" {
   for_each = {
-    for pair in setproduct([var.domain_name, local.www_domain_name], ["A", "AAAA"]) :
+    for pair in setproduct(local.site_domain_names, ["A", "AAAA"]) :
     "${pair[0]}-${pair[1]}" => { name = pair[0], type = pair[1] }
   }
 

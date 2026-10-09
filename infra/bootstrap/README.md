@@ -86,16 +86,9 @@ These roles work only if the later stacks follow these rules.
 
 ## Use portfolio-terraform
 
-Add this profile to `~/.aws/config`:
+The site stack (`infra/site`) assumes `portfolio-terraform` itself, in its provider and its backend. Run it with `AWS_PROFILE=portfolio`. Do not make a separate `portfolio-terraform` CLI profile. If you run as `portfolio-terraform`, the stack tries to assume that role again, and the trust policy rejects the request.
 
-```ini
-[profile portfolio-terraform]
-source_profile = portfolio
-role_arn       = arn:aws:iam::692112934115:role/portfolio-terraform
-region         = us-east-1
-```
-
-Then run the site stack with `AWS_PROFILE=portfolio-terraform`. AWS limits a role assumed from an SSO session to a one-hour session. When it expires, run the command again.
+AWS limits a role assumed from an SSO session to a one-hour session. When it expires, run the command again.
 
 ## Tests
 

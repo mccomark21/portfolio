@@ -4,7 +4,7 @@ output "distribution_id" {
 }
 
 output "distribution_arn" {
-  description = "Set this as distribution_arn in infra/bootstrap/terraform.tfvars, then apply the bootstrap stack again."
+  description = "The ARN that infra/bootstrap needs. Set it as distribution_arn in infra/bootstrap/terraform.tfvars. Then apply the bootstrap stack again."
   value       = aws_cloudfront_distribution.site.arn
 }
 

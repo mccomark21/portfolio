@@ -15,7 +15,7 @@ vm.runInContext(source, context);
 const handler = (event) => JSON.parse(JSON.stringify(context.handler(event)));
 
 // The event shape CloudFront passes to a viewer request function.
-function request(uri, { host = "markmccomiskey.com", querystring = {} } = {}) {
+function viewerEvent(uri, { host = "markmccomiskey.com", querystring = {} } = {}) {
   return {
     request: {
       method: "GET",
@@ -27,21 +27,21 @@ function request(uri, { host = "markmccomiskey.com", querystring = {} } = {}) {
   };
 }
 
-test("a directory path gets index.html", () => {
-  assert.equal(handler(request("/projects/")).uri, "/projects/index.html");
+test("a folder path gets index.html", () => {
+  assert.equal(handler(viewerEvent("/projects/")).uri, "/projects/index.html");
 });
 
 test("the root gets index.html", () => {
-  assert.equal(handler(request("/")).uri, "/index.html");
+  assert.equal(handler(viewerEvent("/")).uri, "/index.html");
 });
 
 test("a file passes through unchanged", () => {
-  assert.equal(handler(request("/_next/static/chunks/main.js")).uri, "/_next/static/chunks/main.js");
-  assert.equal(handler(request("/mark-mccomiskey-resume.pdf")).uri, "/mark-mccomiskey-resume.pdf");
+  assert.equal(handler(viewerEvent("/_next/static/chunks/main.js")).uri, "/_next/static/chunks/main.js");
+  assert.equal(handler(viewerEvent("/mark-mccomiskey-resume.pdf")).uri, "/mark-mccomiskey-resume.pdf");
 });
 
 test("a page path without a trailing slash redirects to the slash form", () => {
-  assert.deepEqual(handler(request("/projects")), {
+  assert.deepEqual(handler(viewerEvent("/projects")), {
     statusCode: 301,
     statusDescription: "Moved Permanently",
     headers: { location: { value: "/projects/" } },
@@ -50,7 +50,7 @@ test("a page path without a trailing slash redirects to the slash form", () => {
 
 test("the slash redirect keeps the query string", () => {
   const response = handler(
-    request("/projects", {
+    viewerEvent("/projects", {
       querystring: {
         tag: { value: "model" },
         status: { value: "shipped" },
@@ -62,7 +62,7 @@ test("the slash redirect keeps the query string", () => {
 
 test("the slash redirect keeps every value of a repeated query key", () => {
   const response = handler(
-    request("/projects", {
+    viewerEvent("/projects", {
       querystring: {
         tag: { value: "model", multiValue: [{ value: "model" }, { value: "application" }] },
       },
@@ -74,7 +74,7 @@ test("the slash redirect keeps every value of a repeated query key", () => {
 test("www redirects to the apex with the same path and query", () => {
   assert.deepEqual(
     handler(
-      request("/projects/", {
+      viewerEvent("/projects/", {
         host: "www.markmccomiskey.com",
         querystring: { tag: { value: "model" } },
       }),
@@ -88,11 +88,16 @@ test("www redirects to the apex with the same path and query", () => {
 });
 
 test("www redirects a page path without a slash in one hop", () => {
-  const response = handler(request("/about", { host: "www.markmccomiskey.com" }));
+  const response = handler(viewerEvent("/about", { host: "www.markmccomiskey.com" }));
   assert.equal(response.headers.location.value, "https://markmccomiskey.com/about/");
 });
 
 test("www redirects a file without adding a slash", () => {
-  const response = handler(request("/favicon.ico", { host: "www.markmccomiskey.com" }));
+  const response = handler(viewerEvent("/favicon.ico", { host: "www.markmccomiskey.com" }));
   assert.equal(response.headers.location.value, "https://markmccomiskey.com/favicon.ico");
+});
+
+test("the slash redirect keeps a parameter that has no value", () => {
+  const response = handler(viewerEvent("/projects", { querystring: { flag: { value: "" } } }));
+  assert.equal(response.headers.location.value, "/projects/?flag");
 });

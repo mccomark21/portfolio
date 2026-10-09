@@ -1,4 +1,4 @@
-# The site bucket holds the built site. These tests hold it to issue #12: it
+# The site bucket holds the static export. These tests hold it to issue #12: it
 # is private, and only this stack's distribution can read it. A mock provider
 # stands in for AWS, so even `command = apply` makes no AWS call.
 
@@ -6,8 +6,8 @@ mock_provider "aws" {
   source = "./tests/mocks"
 }
 
-# The budget import block cannot run against a mock provider. Its settings are
-# checked by the live plan instead.
+# The budget import block cannot run against a mock provider. The live plan
+# checks the budget instead.
 override_resource {
   target = aws_budgets_budget.monthly
 }
@@ -94,6 +94,6 @@ run "only_this_distribution_can_read_the_site_bucket" {
         },
       ]
     }
-    error_message = "The site bucket policy must let only this distribution read it, and must deny every request that does not use TLS."
+    error_message = "The site bucket policy must let only this distribution read it. It must deny every request that does not use TLS."
   }
 }
