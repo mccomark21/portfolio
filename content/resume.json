@@ -4,7 +4,7 @@
     "email": "fixture@example.com",
     "profiles": [
       { "label": "GitHub", "url": "https://github.com/mccomark21" },
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/mark-mccomisky/" }
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/markmccomiskey" }
     ],
     "location": "Fixtureville, OH",
     "placeholder": true
