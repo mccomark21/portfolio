@@ -29,8 +29,8 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-dark)]">
         <header className="sticky top-0 z-10 border-b border-[var(--color-card-border)] bg-[var(--color-nav)]/95 backdrop-blur">
-          <nav className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-6">
-            <Link href="/" className="nav-link-brand font-bold mr-4">
+          <nav className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-4 sm:gap-6">
+            <Link href="/" className="nav-link-brand font-bold sm:mr-4">
               Portfolio
             </Link>
             <NavLinks items={NAV_ROUTES} />

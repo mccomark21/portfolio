@@ -21,7 +21,7 @@ export const NAV_ROUTES: NavRoute[] = [
  * The footer and /about render these links.
  */
 export const SOCIAL_LINKS: NavRoute[] = [
-  { href: "https://www.linkedin.com/in/mark-mccomisky/", label: "LinkedIn" },
+  { href: "https://www.linkedin.com/in/markmccomiskey", label: "LinkedIn" },
   { href: "https://github.com/mccomark21", label: "GitHub" },
 ];
 
