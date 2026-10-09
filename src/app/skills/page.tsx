@@ -23,7 +23,7 @@ export default function SkillsPage() {
                       {skill.projects.map((proj) => (
                         <Link
                           key={proj}
-                          href={`/blog/${proj}`}
+                          href={`/writing/${proj}`}
                           className="text-xs text-[var(--color-nav)] hover:underline"
                         >
                           {proj}

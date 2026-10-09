@@ -1,6 +1,6 @@
 # portfolio
 
-A Next.js portfolio site showcasing projects, blog posts, and professional information. Built with MDX for dynamic content and Tailwind CSS for styling. Deployed as a static site to GitHub Pages.
+A Next.js portfolio site showcasing projects, write-ups, and professional information. Built with MDX for dynamic content and Tailwind CSS for styling. Deployed as a static site to GitHub Pages.
 
 ## Tech Stack
 
@@ -20,11 +20,9 @@ src/
   app/                    # App Router pages
     page.tsx            # Home page
     layout.tsx          # Root layout with navigation
-    about/page.tsx      # About page
-    blog/page.tsx       # Blog listing
-    blog/[slug]/page.tsx # Blog post detail
-    education/page.tsx  # Education page
-    interests/page.tsx  # Interests page
+    about/page.tsx      # About page (education, interests, contact)
+    writing/page.tsx    # Writing index
+    writing/[slug]/page.tsx # Post detail
     resume/page.tsx     # Resume page
     skills/page.tsx     # Skills page
   components/
@@ -40,11 +38,9 @@ src/
       skills.ts         # Skills data utilities
     highlight.ts        # Shiki highlighting setup
 content/
-  pages/                # Static pages (About, Education, Interests)
-    about.mdx
-    education.mdx
-    interests.mdx
-  posts/                # Blog posts
+  pages/                # Static pages
+    about.mdx           # About, with Education and Interests sections
+  posts/                # Posts, served at /writing/[slug]
   projects/             # Project cards (portfolio items)
   skills.json          # Skills manifest
   repos.json           # Watched repositories manifest
@@ -54,7 +50,7 @@ content/
 
 All content uses frontmatter (YAML) for metadata and MDX for body content.
 
-### Blog Posts (`content/posts/*.mdx`)
+### Posts (`content/posts/*.mdx`)
 
 ```yaml
 ---
@@ -75,7 +71,7 @@ needsReview: false                # Optional review flag
 title: "Project Name"
 description: "Short description"
 repoUrl: "https://..."            # Optional
-blogSlug: "related-post-slug"     # Optional link to blog post
+blogSlug: "related-post-slug"     # Optional link to /writing/[slug]
 techStack: ["Tech", "Stack"]      # Optional array
 featured: false                    # Optional; highlights on home page
 ---
@@ -89,10 +85,8 @@ title: "Page Title"
 ---
 ```
 
-Pages are automatically mapped to routes:
+Each page has its own route file under `src/app/`:
 - `about.mdx` → `/about`
-- `education.mdx` → `/education`
-- `interests.mdx` → `/interests`
 
 ### Skills Manifest (`content/skills.json`)
 

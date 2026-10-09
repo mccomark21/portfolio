@@ -10,15 +10,22 @@ export interface NavRoute {
 }
 
 export const NAV_ROUTES: NavRoute[] = [
-  { href: "/blog", label: "Blog" },
-  { href: "/skills", label: "Skills" },
-  { href: "/about", label: "About" },
-  { href: "/education", label: "Education" },
-  { href: "/interests", label: "Interests" },
+  { href: "/projects", label: "Projects" },
+  { href: "/writing", label: "Writing" },
   { href: "/resume", label: "Resume" },
+  { href: "/about", label: "About" },
+];
+
+/**
+ * Contact links. The site publishes no email address and has no contact form.
+ * The footer and /about render these links.
+ */
+export const SOCIAL_LINKS: NavRoute[] = [
+  { href: "https://www.linkedin.com/in/markmccomiskey", label: "LinkedIn" },
+  { href: "https://github.com/mccomark21", label: "GitHub" },
 ];
 
 export const SITE_METADATA = {
   title: "Portfolio",
-  description: "Personal portfolio — projects, blog, and more.",
+  description: "Personal portfolio — projects, writing, and more.",
 };

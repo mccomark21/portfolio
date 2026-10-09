@@ -65,7 +65,7 @@ export default function ProjectCard({ slug, frontmatter }: Props) {
         </Link>
         {links.writeup && (
           <Link
-            href={`/blog/${links.writeup}`}
+            href={`/writing/${links.writeup}`}
             className="text-[var(--color-nav)] hover:underline"
           >
             Write-up →
