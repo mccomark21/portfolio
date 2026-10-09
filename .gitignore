@@ -47,3 +47,6 @@ next-env.d.ts
 crash.log
 crash.*.log
 *.tfplan
+
+# The site stack reads the budget alert address from here. Never commit it.
+infra/site/terraform.tfvars
