@@ -71,7 +71,7 @@ export default function ResumePage() {
 
             {/* The full contact block. The print stylesheet shows it in the PDF only. */}
             <address className="print-only mt-3 not-italic text-sm">
-              {[contact.email, contact.phone, contact.location, ...contact.profiles.map((p) => p.url)]
+              {[contact.email, contact.location, ...contact.profiles.map((p) => p.url)]
                 .filter(Boolean)
                 .join("  ·  ")}
             </address>

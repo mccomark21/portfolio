@@ -100,13 +100,12 @@ export const ResumeProfileSchema = z.object({
   url: z.string().url(),
 });
 
-// The page shows `email` as a mailto link and `profiles` as links. `phone` and
-// `location` appear only in the PDF, through the print stylesheet. `location`
-// is a city and region, never a street address.
+// The page shows `email` as a mailto link and `profiles` as links. `location`
+// appears only in the PDF, through the print stylesheet. `location` is a city
+// and region, never a street address. The resume holds no phone number.
 export const ResumeContactSchema = z.object({
   email: z.string().email(),
   profiles: z.array(ResumeProfileSchema).default([]),
-  phone: z.string().optional(),
   location: z.string().optional(),
   placeholder: z.boolean().default(false),
 });
