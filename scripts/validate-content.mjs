@@ -22,6 +22,7 @@ import {
   SkillsManifestSchema,
   StaticPageFrontmatterSchema,
 } from "../src/lib/content/schemas.ts";
+import { describeCollision, findDuplicateRanks } from "../src/lib/content/featured.ts";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
@@ -106,19 +107,14 @@ function validateJsonFile(fileName, schema) {
 /**
  * A `featured` rank pins one project to one slot on the home page.
  * Two projects at the same rank make the order of that page arbitrary.
+ * The rule lives in src/lib/content/featured.ts. The build applies it too.
  */
 function validateFeaturedRanks(projects) {
-  const byRank = new Map();
+  const fileBySlug = new Map(projects.map((p) => [p.slug, p.file]));
 
-  for (const project of projects) {
-    const rank = project.frontmatter.featured;
-    if (rank === undefined) continue;
-    byRank.set(rank, [...(byRank.get(rank) ?? []), project.file]);
-  }
-
-  for (const [rank, files] of [...byRank].sort((a, b) => a[0] - b[0])) {
-    if (files.length < 2) continue;
-    fail(files.join(" and "), "featured", `${files.length} projects claim rank ${rank}.`);
+  for (const collision of findDuplicateRanks(projects)) {
+    const files = collision.slugs.map((slug) => fileBySlug.get(slug));
+    fail(files.join(" and "), "featured", describeCollision(collision));
   }
 }
 

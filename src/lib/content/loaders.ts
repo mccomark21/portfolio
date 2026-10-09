@@ -16,6 +16,7 @@ import {
   type WatchedRepo,
 } from "./schemas";
 import { isVisible } from "./visibility";
+import { assertUniqueRanks, selectFeatured } from "./featured";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content");
 
@@ -86,15 +87,31 @@ export interface Project extends ProjectMeta {
   content: string;
 }
 
-export function getAllProjects(): ProjectMeta[] {
+/** Every project on disk, hidden placeholders included. */
+function readAllProjects(): ProjectMeta[] {
   const dir = path.join(CONTENT_ROOT, "projects");
-  return readMdxDir(dir)
-    .map((file) => {
-      const raw = fs.readFileSync(path.join(dir, file), "utf-8");
-      const { data } = matter(raw);
-      return { slug: toSlug(file), frontmatter: ProjectFrontmatterSchema.parse(data) };
-    })
-    .filter((p) => isVisible(p.frontmatter));
+  return readMdxDir(dir).map((file) => {
+    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+    const { data } = matter(raw);
+    return { slug: toSlug(file), frontmatter: ProjectFrontmatterSchema.parse(data) };
+  });
+}
+
+export function getAllProjects(): ProjectMeta[] {
+  return readAllProjects().filter((p) => isVisible(p.frontmatter));
+}
+
+/**
+ * The home page's featured set, in rank order, at most FEATURED_CAP.
+ *
+ * The rank check covers every project on disk, as validate-content.mjs does.
+ * A hidden placeholder that shares a rank with a real project still fails the
+ * build, because INCLUDE_PLACEHOLDERS=1 would make that collision visible.
+ */
+export function getFeaturedProjects(): ProjectMeta[] {
+  const all = readAllProjects();
+  assertUniqueRanks(all);
+  return selectFeatured(all.filter((p) => isVisible(p.frontmatter)));
 }
 
 export function getProjectBySlug(slug: string): Project | null {

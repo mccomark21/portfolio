@@ -1,43 +1,56 @@
-import { getAllProjects } from "@/lib/content/loaders";
+import Link from "next/link";
+import { getFeaturedProjects } from "@/lib/content/loaders";
 import ProjectCard from "@/components/ProjectCard";
+import LookingForTeaser from "@/components/LookingForTeaser";
 
+/**
+ * The home page. The hero is the only above-the-fold contract: name, one line
+ * on the work, the resume link, the teaser, and the first featured cards must
+ * all show at 375px. Build and review it at that width first.
+ *
+ * getFeaturedProjects() throws on a duplicate `featured` rank, so a collision
+ * fails the build instead of reordering this page.
+ */
 export default function Home() {
-  const projects = getAllProjects();
-  const featured = projects.filter((p) => p.frontmatter.featured);
-  const rest = projects.filter((p) => !p.frontmatter.featured);
+  const featured = getFeaturedProjects();
 
   return (
-    <div>
-      <section className="mb-14">
-        <h1 className="text-4xl font-bold text-[var(--color-text-dark)] mb-3">Hi, I&apos;m Mark 👋</h1>
-        <p className="text-[var(--color-text-dark)]/85 text-lg max-w-2xl">
-          Software engineer focused on developer tooling and AI-assisted workflows. Here are some
-          things I&apos;ve built.
-        </p>
+    <div className="space-y-8 sm:space-y-12">
+      <section className="space-y-4">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-dark)] mb-2">
+            Mark McComiskey
+          </h1>
+          <p className="text-[var(--color-text-dark)]/85 text-base sm:text-lg max-w-2xl">
+            Software engineer focused on developer tooling and AI-assisted workflows.
+          </p>
+        </div>
+        <Link
+          href="/resume"
+          className="btn-primary inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+        >
+          Resume →
+        </Link>
+        <LookingForTeaser />
       </section>
 
       {featured.length > 0 && (
-        <section className="mb-12 rounded-2xl bg-[var(--color-bg-accent)] p-6">
-          <h2 className="text-xl font-semibold text-[var(--color-text-dark)] mb-4">Featured</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
+        <section aria-labelledby="featured-heading">
+          <h2
+            id="featured-heading"
+            className="text-xl font-semibold text-[var(--color-text-dark)] mb-4"
+          >
+            Featured work
+          </h2>
+          <ol className="grid sm:grid-cols-2 gap-4">
             {featured.map((p) => (
-              <ProjectCard key={p.slug} slug={p.slug} frontmatter={p.frontmatter} />
+              <li key={p.slug} className="grid">
+                <ProjectCard slug={p.slug} frontmatter={p.frontmatter} />
+              </li>
             ))}
-          </div>
-        </section>
-      )}
-
-      {rest.length > 0 && (
-        <section>
-          <h2 className="text-xl font-semibold text-[var(--color-text-dark)] mb-4">All Projects</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rest.map((p) => (
-              <ProjectCard key={p.slug} slug={p.slug} frontmatter={p.frontmatter} />
-            ))}
-          </div>
+          </ol>
         </section>
       )}
     </div>
   );
 }
-
