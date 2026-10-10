@@ -1,19 +1,27 @@
-name: Deploy to GitHub Pages
+name: Deploy to AWS
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+# id-token: write lets the job request a GitHub OIDC token, which AWS trades
+# for short-lived portfolio-deploy credentials. No AWS key is stored here.
 permissions:
-  contents: write
+  id-token: write
+  contents: read
 
 concurrency:
-  group: pages-deploy
+  group: deploy
   cancel-in-progress: false
 
+# The role, bucket and distribution come from infra/bootstrap and infra/site.
+# They are not secrets. scripts/deploy-workflow.test.mjs checks each value.
 jobs:
-  build-and-deploy:
+  # Do not add a GitHub `environment:` to this job. An environment changes the
+  # token sub to repo:...:environment:<name>, and the portfolio-deploy trust
+  # policy then rejects it. See infra/bootstrap/README.md.
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -43,22 +51,40 @@ jobs:
       - name: Build resume PDF
         run: node scripts/build-resume-pdf.mjs
 
-      - name: Verify output directory
-        run: |
-          if [ ! -d "out" ]; then
-            echo "❌ Build failed: 'out' directory was not generated."
-            exit 1
-          fi
-          echo "✅ Static export generated:"
-          find out -maxdepth 1 | head -20
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Assume the deploy role
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          publish_branch: gh-pages
-          enable_jekyll: false
-          commit_message: "deploy: ${{ github.sha }}"
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
+          role-to-assume: arn:aws:iam::692112934115:role/portfolio-deploy
+          role-session-name: portfolio-deploy-${{ github.run_id }}
+          aws-region: us-east-1
+
+      # Three passes, so a reader never gets a page whose assets are missing:
+      # 1. Upload the hashed assets in _next/static. Their names change when
+      #    their content changes, so browsers can cache them for a year.
+      # 2. Upload everything else and delete what out/ no longer has. Browsers
+      #    revalidate these files on every visit. CloudFront keeps them until
+      #    the invalidation below.
+      # 3. Delete the hashed assets that the new pages no longer reference.
+      - name: Upload hashed assets
+        run: >
+          aws s3 sync out/_next/static "s3://portfolio-site-692112934115/_next/static"
+          --cache-control "public, max-age=31536000, immutable"
+
+      - name: Upload pages and delete removed files
+        run: >
+          aws s3 sync out/ "s3://portfolio-site-692112934115"
+          --delete
+          --exclude "_next/static/*"
+          --cache-control "public, max-age=0, s-maxage=31536000, must-revalidate"
+
+      - name: Delete unused hashed assets
+        run: >
+          aws s3 sync out/_next/static "s3://portfolio-site-692112934115/_next/static"
+          --delete
+          --cache-control "public, max-age=31536000, immutable"
+
+      - name: Invalidate the CloudFront cache
+        run: >
+          aws cloudfront create-invalidation
+          --distribution-id E3SQVTT7TTHMBH
+          --paths "/*"
